@@ -6,22 +6,19 @@ import type { DetectionRule } from './types'
  * Scoring philosophy (see also score.ts):
  * - Weights are relative severity, not "percent scam".
  * - Several moderate signals can accumulate into "Review carefully".
- * - High risk usually needs either one strong credential/payment ask
- *   plus supporting pressure, or a stack of distinct categories.
- * - Patterns intentionally favor common English scam phrasing used in
- *   SMS / email / chat. They will miss novel wording and can false-flag
- *   legitimate messages that use similar language.
+ * - High risk usually needs a strong ask plus pressure/channel, or stacked categories.
+ * - Patterns favor common English (and common India-facing) scam phrasing.
  */
 
 const URL_PATTERN =
   /(?:https?:\/\/|www\.)[^\s<>"')\]]+|bit\.ly\/\w+|t\.co\/\w+|tinyurl\.com\/\w+|goo\.gl\/\w+|rb\.gy\/\w+/gi
 
 const SHORTENER_HOSTS =
-  /(?:bit\.ly|t\.co|tinyurl\.com|goo\.gl|rb\.gy|ow\.ly|is\.gd|cutt\.ly|rebrand\.ly|shorturl\.at)\b/i
+  /(?:bit\.ly|t\.co|tinyurl\.com|goo\.gl|rb\.gy|ow\.ly|is\.gd|cutt\.ly|rebrand\.ly|shorturl\.at|bl\.ink|tiny\.cc)\b/i
 
 /** Domains that often appear in phishing lookalikes (typosquats / odd TLDs). */
 const LOOKALIKE_HINT =
-  /(?:[a-z0-9-]+\.)?(?:paypa1|micros0ft|app1e|amaz0n|netf1ix|faceb00k|go0gle|banks?[-]?secure|account[-]?verify|login[-]?secure)\.[a-z]{2,}/i
+  /(?:[a-z0-9-]+\.)?(?:paypa1|micros0ft|app1e|amaz0n|netf1ix|faceb00k|go0gle|banks?[-]?secure|account[-]?verify|login[-]?secure|sbi[-]?secure|hdfc[-]?verify|icici[-]?secure)\.[a-z]{2,}/i
 
 function findFirstMatch(text: string, patterns: RegExp[]): string | null {
   for (const pattern of patterns) {
@@ -37,7 +34,7 @@ function findFirstMatch(text: string, patterns: RegExp[]): string | null {
   return null
 }
 
-function extractSuspiciousLinks(text: string): string | null {
+function extractHighRiskLinks(text: string): string | null {
   const urls = text.match(URL_PATTERN)
   if (!urls || urls.length === 0) return null
 
@@ -49,13 +46,27 @@ function extractSuspiciousLinks(text: string): string | null {
     if (LOOKALIKE_HINT.test(cleaned)) {
       return cleaned
     }
-    // IP-literal or non-https looking login pages are higher concern
     if (/https?:\/\/\d{1,3}(?:\.\d{1,3}){3}/i.test(cleaned)) {
+      return cleaned
+    }
+    // Login / verify / secure path on an unexpected host
+    if (
+      /https?:\/\/[^\s/]+\/(?:login|signin|verify|secure|account|update|kyc)/i.test(
+        cleaned,
+      )
+    ) {
       return cleaned
     }
   }
 
-  // Any link still matters as a weak signal when paired with other pressure
+  return null
+}
+
+function extractAnyLink(text: string): string | null {
+  // Avoid double-counting when a high-risk link already matches
+  if (extractHighRiskLinks(text)) return null
+  const urls = text.match(URL_PATTERN)
+  if (!urls || urls.length === 0) return null
   return urls[0].replace(/[.,;:!?)]+$/, '')
 }
 
@@ -65,7 +76,7 @@ export const DETECTION_RULES: DetectionRule[] = [
     category: 'urgency',
     title: 'Urgent pressure or threats',
     explanation:
-      'Scammers push you to act before you can verify. Phrases about accounts being locked, legal action, or “act now” create panic.',
+      'Scammers push you to act before you can verify. Phrases about accounts being locked, legal action, or "act now" create panic.',
     weight: 14,
     patterns: [
       /\bact\s+now\b/i,
@@ -73,12 +84,16 @@ export const DETECTION_RULES: DetectionRule[] = [
       /\bwithin\s+\d+\s*(?:hours?|mins?|minutes?|hrs?)\b/i,
       /\burgent(?:ly)?\b/i,
       /\bfinal\s+notice\b/i,
-      /\baccount\s+(?:will\s+be\s+)?(?:suspended|locked|closed|blocked)\b/i,
+      /\baccount\s+(?:will\s+be\s+)?(?:suspended|locked|closed|blocked|deactivated)\b/i,
       /\blegal\s+action\b/i,
       /\bwarrant\b/i,
       /\barrest\b/i,
       /\blast\s+chance\b/i,
       /\brespond\s+(?:within|immediately)\b/i,
+      /\bexpir(?:e|es|ing|ed)\s+(?:today|tonight|soon|in\s+\d+)\b/i,
+      /\blimited\s+time\b/i,
+      /\baction\s+required\b/i,
+      /\bfailure\s+to\s+(?:respond|verify|update)\b/i,
     ],
   },
   {
@@ -90,12 +105,33 @@ export const DETECTION_RULES: DetectionRule[] = [
     weight: 26,
     patterns: [
       /\b(?:password|passcode|pass\s*code)\b/i,
-      /\b(?:pin|p\.i\.n\.?)\b/i,
-      /\b(?:otp|one[-\s]?time\s+(?:password|passcode|code)|verification\s+code|security\s+code)\b/i,
-      /\bconfirm\s+your\s+(?:password|pin|otp|credentials)\b/i,
+      /\b(?:atm\s+)?(?:pin|p\.i\.n\.?)\b(?:\s+(?:code|number))?\b/i,
+      /\b(?:otp|one[-\s]?time\s+(?:password|passcode|code)|verification\s+code|security\s+code|auth(?:entication)?\s+code)\b/i,
+      /\bconfirm\s+your\s+(?:password|pin|otp|credentials|login)\b/i,
       /\bsend\s+(?:me\s+)?(?:your\s+)?(?:password|pin|otp|code)\b/i,
       /\breply\s+with\s+(?:your\s+)?(?:password|pin|otp|code)\b/i,
       /\bshare\s+(?:your\s+)?(?:password|pin|otp|verification\s+code)\b/i,
+      /\benter\s+(?:your\s+)?(?:password|pin|otp|cvv)\b/i,
+      /\bprovide\s+(?:your\s+)?(?:password|otp|credentials)\b/i,
+      /\b2fa\s+code\b|\btwo[-\s]factor\s+code\b/i,
+    ],
+  },
+  {
+    id: 'personal-kyc',
+    category: 'credentials',
+    title: 'Asks for ID, KYC, or sensitive personal details',
+    explanation:
+      'Unexpected requests for Aadhaar, PAN, full KYC dumps, or date of birth over chat or SMS are high risk. Official teams use secure apps or branches.',
+    weight: 22,
+    patterns: [
+      /\baadhaar\b|\baadhar\b|\buidai\b/i,
+      /\bpan\s+(?:card|number)\b/i,
+      /\bkyc\s+(?:update|pending|incomplete|verify|verification|link)\b/i,
+      /\bcomplete\s+(?:your\s+)?kyc\b/i,
+      /\bshare\s+(?:your\s+)?(?:aadhaar|aadhar|pan|ssn|social\s+security)\b/i,
+      /\bdate\s+of\s+birth\b.{0,40}\b(?:confirm|send|reply|share|verify)\b/i,
+      /\bfull\s+name\s+as\s+per\s+(?:aadhaar|pan|id)\b/i,
+      /\bmother'?s?\s+maiden\s+name\b/i,
     ],
   },
   {
@@ -103,7 +139,7 @@ export const DETECTION_RULES: DetectionRule[] = [
     category: 'money',
     title: 'Requests money, gift cards, or bank details',
     explanation:
-      'Unexpected requests for money transfers, gift cards, crypto, or full bank/card details are classic scam tactics.',
+      'Unexpected requests for money transfers, gift cards, crypto, UPI collects, or full bank/card details are classic scam tactics.',
     weight: 24,
     patterns: [
       /\bgift\s*cards?\b/i,
@@ -116,8 +152,12 @@ export const DETECTION_RULES: DetectionRule[] = [
       /\bcvv\b|\bcvc\b/i,
       /\bsend\s+(?:money|funds|payment|cash)\b/i,
       /\bpay\s+(?:me|us|here|via|using)\b/i,
-      /\bupi\s+(?:id|pin)\b/i,
+      /\bupi\s+(?:id|pin|request|collect)\b/i,
+      /\b(?:pay\s+to|send\s+to)\s+\d{10}@[a-z]+/i,
+      /\bcollect\s+request\b/i,
       /\baccount\s+number\b/i,
+      /\bifsc\b/i,
+      /\bimmediately\s+transfer\b/i,
     ],
   },
   {
@@ -125,7 +165,7 @@ export const DETECTION_RULES: DetectionRule[] = [
     category: 'prize',
     title: 'Unexpected prize, refund, or reward',
     explanation:
-      '“You won” / surprise refund messages often lure people into clicking links or sharing personal details.',
+      '"You won" / surprise refund messages often lure people into clicking links or sharing personal details.',
     weight: 16,
     patterns: [
       /\byou(?:'ve| have)?\s+won\b/i,
@@ -136,17 +176,29 @@ export const DETECTION_RULES: DetectionRule[] = [
       /\brefund\s+(?:pending|available|waiting)\b/i,
       /\bclaim\s+(?:your|the)\s+(?:prize|reward|refund)\b/i,
       /\bselected\s+(?:as\s+)?(?:a\s+)?(?:winner|lucky)\b/i,
+      /\bcashback\s+(?:credited|pending|waiting)\b/i,
+      /\byou\s+are\s+(?:eligible|selected)\s+for\b/i,
     ],
   },
   {
     id: 'suspicious-links',
     category: 'links',
-    title: 'Links or shortened / suspicious URLs',
+    title: 'Shortened or lookalike / login URLs',
     explanation:
-      'Links in unexpected messages can lead to lookalike login pages. Shortened URLs hide the real destination.',
-    weight: 12,
+      'Shortened links hide the real destination. Lookalike domains and unexpected login or KYC URLs often lead to phishing pages.',
+    weight: 16,
     patterns: [],
-    test: (text) => extractSuspiciousLinks(text),
+    test: (text) => extractHighRiskLinks(text),
+  },
+  {
+    id: 'generic-link',
+    category: 'links',
+    title: 'Contains a web link',
+    explanation:
+      'Any unexpected link deserves caution, especially with pressure to click. On its own this is a weak signal.',
+    weight: 8,
+    patterns: [],
+    test: (text) => extractAnyLink(text),
   },
   {
     id: 'software-attachments',
@@ -157,12 +209,13 @@ export const DETECTION_RULES: DetectionRule[] = [
     weight: 20,
     patterns: [
       /\binstall\s+(?:this|our|the)?\s*(?:app|software|apk|update)\b/i,
-      /\bdownload\s+(?:this|the|our)\s+(?:app|file|attachment|update)\b/i,
+      /\bdownload\s+(?:this|the|our)\s+(?:app|file|attachment|update|apk)\b/i,
       /\bremote\s+(?:access|desktop|support)\b/i,
-      /\banydesk\b|\bteamviewer\b|\bultraviewer\b/i,
+      /\banydesk\b|\bteamviewer\b|\bultraviewer\b|\bquick\s*assist\b/i,
       /\bopen\s+(?:the\s+)?attachment\b/i,
       /\benable\s+macros?\b/i,
       /\bscan\s+(?:the\s+)?qr\s*code\b/i,
+      /\ballow\s+(?:screen\s+)?sharing\b/i,
     ],
   },
   {
@@ -174,12 +227,15 @@ export const DETECTION_RULES: DetectionRule[] = [
     weight: 15,
     patterns: [
       /\b(?:this\s+is|we\s+are|calling\s+from)\s+(?:your\s+)?(?:bank|support|security\s+team)\b/i,
-      /\b(?:microsoft|apple|google|amazon|paypal|irs|income\s+tax|customs|fedex|dhl|ups)\s+(?:support|security|team|alert)\b/i,
-      /\bit\s+support\b|\btech\s+support\b/i,
+      /\b(?:microsoft|apple|google|amazon|paypal|irs|income\s+tax|customs|fedex|dhl|ups|sbi|hdfc|icici|axis\s+bank|paytm|phonepe|flipkart)\s+(?:support|security|team|alert|customer\s+care)\b/i,
+      /\bit\s+support\b|\btech\s+support\b|\bcustomer\s+care\b/i,
       /\byour\s+(?:bank|account)\s+(?:security|fraud)\s+(?:department|team)\b/i,
       /\b(?:bank|account)\s+security\s+team\b/i,
       /\bon\s+behalf\s+of\b/i,
       /\bofficial\s+(?:notice|alert|warning)\s+from\b/i,
+      /\bfrom\s+(?:the\s+)?(?:fraud|security)\s+(?:prevention\s+)?(?:team|department)\b/i,
+      /\bcourier\s+(?:partner|service|delivery)\b/i,
+      /\bcustoms\s+(?:duty|clearance|department)\b/i,
     ],
   },
   {
@@ -197,6 +253,7 @@ export const DETECTION_RULES: DetectionRule[] = [
       /\bdo\s+not\s+share\s+this\s+(?:with|message)\b/i,
       /\bbetween\s+us\b/i,
       /\bconfidential(?:ly)?\b.{0,40}\bdon'?t\s+tell\b/i,
+      /\bdelete\s+(?:this|the)\s+(?:message|chat)\s+after\b/i,
     ],
   },
   {
@@ -204,15 +261,17 @@ export const DETECTION_RULES: DetectionRule[] = [
     category: 'payment_unusual',
     title: 'Unusual payment instructions',
     explanation:
-      'Legitimate organizations rarely ask for payment via gift cards, crypto-only channels, or personal money-transfer apps for “fees” or “taxes on prizes”.',
+      'Legitimate organizations rarely ask for payment via gift cards, crypto-only channels, or personal money-transfer apps for "fees" or "taxes on prizes".',
     weight: 18,
     patterns: [
-      /\bpay\s+(?:the\s+)?(?:fee|tax|duty|release\s+fee)\b/i,
+      /\bpay\s+(?:the\s+)?(?:fee|tax|duty|release\s+fee|clearance\s+fee)\b/i,
       /\bprocessing\s+fee\b/i,
+      /\bdelivery\s+(?:rebooking\s+)?fee\b/i,
       /\bsend\s+(?:via|through)\s+(?:western\s+union|moneygram|cashapp|venmo|zelle)\b/i,
       /\bgift\s*card\s+(?:code|pin|numbers?)\b/i,
       /\btransfer\s+(?:to\s+)?(?:this\s+)?wallet\b/i,
       /\bpay\s+only\s+(?:with|via|using)\s+(?:bitcoin|crypto|gift\s*cards?)\b/i,
+      /\badvance\s+(?:fee|payment)\b/i,
     ],
   },
 ]

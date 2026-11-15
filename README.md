@@ -46,22 +46,30 @@ The checker is **rule-based TypeScript** under `src/detection/`:
 
 | File | Role |
 | --- | --- |
-| `rules.ts` | Extensible catalogue of warning-sign patterns (urgency, credentials, money, prizes, links, software, impersonation, secrecy, unusual payment) |
-| `score.ts` | Weighted sum, category-diversity bonus, thresholds, next-step copy |
+| `normalize.ts` | Local text cleanup before matching (obfuscation, lookalikes, spacing tricks) |
+| `rules.ts` | Extensible catalogue of warning-sign patterns (urgency, credentials/KYC, money/UPI, prizes, links, software, impersonation, secrecy, unusual payment) |
+| `score.ts` | Weighted sum, diversity + combo bonuses, thresholds, next-step copy |
 | `checkMessage.ts` | Runs rules, builds the explainable result |
 | `types.ts` | Shared types |
 
 ### Scoring approach
 
-1. Each matched rule contributes its **weight** (roughly 8 to 28). Stronger hallmarks (password/OTP asks, gift-card/bank asks) weigh more than weaker cues (a lone link).
-2. If hits span **3+ categories**, a small **diversity bonus (+8)** is added. Scams often stack pressure, ask, and channel.
-3. The total is capped at **100**.
-4. Threshold bands:
+1. Text is **normalized** first (spacing tricks, lookalike characters, light obfuscation) so wording like `p a s s w o r d` still matches.
+2. Each matched rule contributes its **weight** (roughly 8 to 28). Stronger hallmarks (password/OTP asks, KYC/UPI asks, gift-card/bank asks) weigh more than weaker cues (a lone ordinary link).
+3. Shortened / lookalike / login URLs score higher than a generic link.
+4. If hits span **3+ categories**, a **diversity bonus (+8)** is added.
+5. **Dangerous combo bonuses** apply when known stacks appear together (for example credentials + urgency, impersonation + link), capped so overlaps cannot runaway-score.
+6. The total is capped at **100**.
+7. Threshold bands:
    - **0 to 29**: Low risk
    - **30 to 59**: Review carefully
    - **60 to 100**: High risk
 
 A single weak signal does **not** auto-escalate to High risk. The UI shows matched text, weights, and expandable scoring notes so the outcome stays explainable.
+
+```bash
+npm run test:detection   # regression checks for examples + edge cases
+```
 
 ## Limitations
 

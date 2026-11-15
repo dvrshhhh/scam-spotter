@@ -1,4 +1,4 @@
-import type { DetectedSignal, RiskLevel } from './types'
+import type { DetectedSignal, RiskLevel, SignalCategory } from './types'
 
 /**
  * Scoring logic
@@ -6,44 +6,122 @@ import type { DetectedSignal, RiskLevel } from './types'
  * 1. Sum raw weights of distinct rule hits.
  * 2. Apply a small category-diversity bonus when 3+ different categories fire
  *    (scams often combine pressure + ask + channel).
- * 3. Cap the final score at 100.
- * 4. Map to risk bands with conservative thresholds:
+ * 3. Apply combo bonuses for known dangerous stacks
+ *    (e.g. credentials + urgency, impersonation + links).
+ * 4. Cap the final score at 100.
+ * 5. Map to risk bands with conservative thresholds:
  *
- *    0 to 29   -> Low risk          (few/weak signals; still not a guarantee of safety)
- *    30 to 59  -> Review carefully  (enough to warrant caution and manual verification)
- *    60 to 100 -> High risk         (strong credential/payment asks and/or stacked signals)
+ *    0 to 29   -> Low risk
+ *    30 to 59  -> Review carefully
+ *    60 to 100 -> High risk
  *
- * Important guardrails:
- * - A single weak signal (e.g. only a generic link, weight ~12) stays Low.
- * - A lone strong credential ask (~26) lands in Review carefully, not High,
- *   unless other supporting signals push the total over 60.
+ * Guardrails:
+ * - A single weak signal stays Low.
+ * - A lone strong credential ask lands in Review carefully, not High,
+ *   unless other supporting signals or combos push the total over 60.
  */
 
 export const SCORE_CAP = 100
 export const LOW_MAX = 29
 export const REVIEW_MAX = 59
 
-/** Bonus when hits span many categories (stacked social engineering). */
 export const DIVERSITY_BONUS_THRESHOLD = 3
 export const DIVERSITY_BONUS_POINTS = 8
+
+/** Cap stacked combo bonuses so one message cannot over-escalate from overlaps alone. */
+export const COMBO_BONUS_CAP = 16
+
+interface ComboRule {
+  id: string
+  label: string
+  points: number
+  /** All listed categories must appear among hits. */
+  requires: SignalCategory[]
+}
+
+const COMBO_RULES: ComboRule[] = [
+  {
+    id: 'credentials-urgency',
+    label: 'Credential ask plus urgency',
+    points: 10,
+    requires: ['credentials', 'urgency'],
+  },
+  {
+    id: 'impersonation-credentials',
+    label: 'Trusted-brand impersonation plus credential ask',
+    points: 10,
+    requires: ['impersonation', 'credentials'],
+  },
+  {
+    id: 'impersonation-links',
+    label: 'Impersonation plus suspicious link',
+    points: 4,
+    requires: ['impersonation', 'links'],
+  },
+  {
+    id: 'money-secrecy',
+    label: 'Money ask plus secrecy pressure',
+    points: 8,
+    requires: ['money', 'secrecy'],
+  },
+  {
+    id: 'prize-unusual-pay',
+    label: 'Prize or refund bait plus unusual payment',
+    points: 8,
+    requires: ['prize', 'payment_unusual'],
+  },
+  {
+    id: 'credentials-links',
+    label: 'Credential ask plus link',
+    points: 6,
+    requires: ['credentials', 'links'],
+  },
+]
 
 export function computeRawScore(signals: DetectedSignal[]): {
   raw: number
   diversityBonus: number
-  categories: string[]
+  comboBonus: number
+  comboNotes: string[]
+  categories: SignalCategory[]
 } {
   const raw = signals.reduce((sum, signal) => sum + signal.weight, 0)
-  const categories = [...new Set(signals.map((s) => s.category))]
+  const categories = [
+    ...new Set(signals.map((s) => s.category)),
+  ] as SignalCategory[]
+
   const diversityBonus =
     categories.length >= DIVERSITY_BONUS_THRESHOLD
       ? DIVERSITY_BONUS_POINTS
       : 0
 
-  return { raw, diversityBonus, categories }
+  const categorySet = new Set(categories)
+  const comboNotes: string[] = []
+  let comboBonus = 0
+
+  for (const combo of COMBO_RULES) {
+    if (combo.requires.every((needed) => categorySet.has(needed))) {
+      comboBonus += combo.points
+      comboNotes.push(`${combo.label} (+${combo.points})`)
+    }
+  }
+
+  if (comboBonus > COMBO_BONUS_CAP) {
+    comboNotes.push(
+      `Combo bonus capped at +${COMBO_BONUS_CAP} (raw combos were +${comboBonus}).`,
+    )
+    comboBonus = COMBO_BONUS_CAP
+  }
+
+  return { raw, diversityBonus, comboBonus, comboNotes, categories }
 }
 
-export function finalizeScore(raw: number, diversityBonus: number): number {
-  return Math.min(SCORE_CAP, raw + diversityBonus)
+export function finalizeScore(
+  raw: number,
+  diversityBonus: number,
+  comboBonus = 0,
+): number {
+  return Math.min(SCORE_CAP, raw + diversityBonus + comboBonus)
 }
 
 export function riskFromScore(score: number): RiskLevel {
@@ -91,7 +169,7 @@ export function nextStepsFor(level: RiskLevel): string[] {
     return [
       'Stop interacting with the message. Do not reply, click, install software, or send money.',
       ...shared,
-      'If you already shared credentials or paid, contact your bank or the service’s official support immediately and change passwords from a device you trust.',
+      'If you already shared credentials or paid, contact your bank or the service official support immediately and change passwords from a device you trust.',
     ]
   }
 

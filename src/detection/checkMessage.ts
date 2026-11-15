@@ -1,3 +1,4 @@
+import { normalizeMessage } from './normalize'
 import { DETECTION_RULES, evaluateRule } from './rules'
 import {
   computeRawScore,
@@ -18,12 +19,12 @@ import type { CheckResult, DetectedSignal } from './types'
  * Message text never leaves the browser in this function.
  */
 export function checkMessage(rawText: string): CheckResult {
-  const text = rawText.trim()
+  const { original, normalized } = normalizeMessage(rawText)
   const signals: DetectedSignal[] = []
 
-  if (text.length > 0) {
+  if (normalized.length > 0) {
     for (const rule of DETECTION_RULES) {
-      const matched = evaluateRule(rule, text)
+      const matched = evaluateRule(rule, normalized)
       if (!matched) continue
 
       signals.push({
@@ -40,14 +41,21 @@ export function checkMessage(rawText: string): CheckResult {
   // Sort strongest signals first for the UI
   signals.sort((a, b) => b.weight - a.weight)
 
-  const { raw, diversityBonus, categories } = computeRawScore(signals)
-  const score = finalizeScore(raw, diversityBonus)
+  const { raw, diversityBonus, comboBonus, comboNotes, categories } =
+    computeRawScore(signals)
+  const score = finalizeScore(raw, diversityBonus, comboBonus)
   const riskLevel = riskFromScore(score)
 
   const scoringNotes: string[] = [
     `Detected ${signals.length} warning sign${signals.length === 1 ? '' : 's'} across ${categories.length} categor${categories.length === 1 ? 'y' : 'ies'}.`,
     `Raw weight sum: ${raw}.`,
   ]
+
+  if (original !== normalized) {
+    scoringNotes.push(
+      'Message text was normalized first (spacing tricks, lookalike characters, light obfuscation) before matching.',
+    )
+  }
 
   if (diversityBonus > 0) {
     scoringNotes.push(
@@ -57,6 +65,14 @@ export function checkMessage(rawText: string): CheckResult {
     scoringNotes.push(
       `No diversity bonus (needs ${DIVERSITY_BONUS_THRESHOLD}+ categories).`,
     )
+  }
+
+  if (comboBonus > 0) {
+    scoringNotes.push(
+      `Dangerous combo bonus: +${comboBonus}. ${comboNotes.join('; ')}.`,
+    )
+  } else {
+    scoringNotes.push('No dangerous combo bonus.')
   }
 
   scoringNotes.push(
