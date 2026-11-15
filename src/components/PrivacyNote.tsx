@@ -1,5 +1,3 @@
-import { Lock, Save } from 'lucide-react'
-
 interface PrivacyNoteProps {
   onSaveScan?: () => void
   saveEnabled?: boolean
@@ -13,59 +11,48 @@ export function PrivacyNote({
 }: PrivacyNoteProps) {
   return (
     <aside
-      className="rounded-3xl border border-line bg-panel/90 p-5 shadow-[0_10px_40px_-28px_rgba(15,76,70,0.35)]"
+      className="border-l-4 border-signal bg-white px-4 py-4 sm:px-5"
       aria-labelledby="privacy-heading"
     >
-      <div className="flex items-start gap-3">
-        <span
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand"
-          aria-hidden="true"
-        >
-          <Lock className="h-5 w-5" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h2
-            id="privacy-heading"
-            className="font-display text-lg font-semibold text-ink"
-          >
-            Privacy note
-          </h2>
-          <ul className="mt-2 space-y-2 text-sm leading-relaxed text-ink-muted">
-            <li>
-              Message checking is <strong className="font-semibold text-ink">local</strong>.
-              Your text is analyzed in this browser with open rule-based logic—no
-              server upload and no remote AI call.
-            </li>
-            <li>
-              Contents are <strong className="font-semibold text-ink">not stored</strong> unless
-              you explicitly choose to save a scan summary to this device.
-            </li>
-            <li>
-              This checker flags common warning signs and can make mistakes. A
-              low-risk result does <em>not</em> mean a message is safe.
-            </li>
-          </ul>
+      <h2
+        id="privacy-heading"
+        className="font-display text-base font-bold text-ink"
+      >
+        Privacy note
+      </h2>
+      <ul className="mt-2 space-y-2 text-sm leading-relaxed text-ink-muted">
+        <li>
+          Checking is <strong className="font-semibold text-ink">local</strong>.
+          Text stays in this browser—no upload, no remote AI.
+        </li>
+        <li>
+          Contents are{' '}
+          <strong className="font-semibold text-ink">not stored</strong> unless
+          you choose to save a scan summary on this device.
+        </li>
+        <li>
+          The checker flags common warning signs and can be wrong. Low risk does
+          not mean a message is safe.
+        </li>
+      </ul>
 
-          {onSaveScan && (
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={onSaveScan}
-                disabled={!saveEnabled}
-                className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-line bg-surface px-3 text-sm font-semibold text-ink-muted transition hover:border-brand/30 hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Save className="h-4 w-4" aria-hidden="true" />
-                Save this scan locally
-              </button>
-              {saveStatus && (
-                <p className="text-sm text-brand" role="status">
-                  {saveStatus}
-                </p>
-              )}
-            </div>
+      {onSaveScan && (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={onSaveScan}
+            disabled={!saveEnabled}
+            className="inline-flex min-h-10 items-center border border-line bg-sheet px-3 text-sm font-semibold text-ink-muted transition hover:border-ink hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Save this scan locally
+          </button>
+          {saveStatus && (
+            <p className="text-sm text-ink-muted" role="status">
+              {saveStatus}
+            </p>
           )}
         </div>
-      </div>
+      )}
     </aside>
   )
 }

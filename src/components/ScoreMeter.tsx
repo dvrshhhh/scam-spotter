@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react'
 import type { RiskLevel } from '../detection/types'
 
 interface ScoreMeterProps {
@@ -7,67 +6,55 @@ interface ScoreMeterProps {
   riskLabel: string
 }
 
-const RISK_STROKE: Record<RiskLevel, string> = {
-  low: '#1f7a4d',
-  review: '#9a6b12',
-  high: '#b42318',
+const RISK_FILL: Record<RiskLevel, string> = {
+  low: 'bg-risk-low',
+  review: 'bg-risk-mid',
+  high: 'bg-risk-high',
 }
 
-/** SVG arc meter from 0–100. Color is reinforced by label text + icon pattern. */
+const RISK_MARK: Record<RiskLevel, string> = {
+  low: '■■□',
+  review: '■■■',
+  high: '▣▣▣',
+}
+
+/** Horizontal 0–100 meter. Color is paired with text label + mark pattern. */
 export function ScoreMeter({ score, riskLevel, riskLabel }: ScoreMeterProps) {
-  const size = 168
-  const stroke = 12
-  const radius = (size - stroke) / 2
-  const circumference = 2 * Math.PI * radius
-  // Show three-quarter arc for a gauge feel
-  const arcLength = circumference * 0.75
-  const progress = Math.max(0, Math.min(100, score)) / 100
-  const dashOffset = arcLength * (1 - progress)
+  const progress = Math.max(0, Math.min(100, score))
 
   return (
     <div
-      className="relative mx-auto flex w-[168px] flex-col items-center"
+      className="w-full max-w-sm"
       role="img"
       aria-label={`Risk score ${score} out of 100: ${riskLabel}`}
     >
-      <svg
-        width={size}
-        height={size * 0.78}
-        viewBox={`0 0 ${size} ${size * 0.78}`}
-        className="overflow-visible"
-        aria-hidden="true"
-      >
-        <g transform={`translate(${size / 2} ${size / 2}) rotate(135)`}>
-          <circle
-            r={radius}
-            fill="none"
-            stroke="#d5e2dd"
-            strokeWidth={stroke}
-            strokeDasharray={`${arcLength} ${circumference}`}
-            strokeLinecap="round"
-          />
-          <circle
-            r={radius}
-            fill="none"
-            stroke={RISK_STROKE[riskLevel]}
-            strokeWidth={stroke}
-            strokeDasharray={`${arcLength} ${circumference}`}
-            strokeDashoffset={dashOffset}
-            strokeLinecap="round"
-            className="animate-meter"
-            style={
-              {
-                '--meter-circumference': arcLength,
-              } as CSSProperties
-            }
-          />
-        </g>
-      </svg>
-      <div className="pointer-events-none absolute inset-x-0 top-[42%] -translate-y-1/2 text-center">
-        <p className="font-display text-4xl font-bold tracking-tight text-ink">
-          {score}
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <p className="font-display text-4xl font-extrabold tracking-tight text-ink tabular-nums sm:text-5xl">
+            {score}
+            <span className="ml-1 text-lg font-semibold text-ink-soft">/100</span>
+          </p>
+          <p className="mt-1 text-xs font-semibold tracking-wide text-ink-soft">
+            Score meter
+          </p>
+        </div>
+        <p
+          className="font-display text-lg font-bold tracking-widest text-ink-soft"
+          aria-hidden="true"
+        >
+          {RISK_MARK[riskLevel]}
         </p>
-        <p className="text-sm font-semibold text-ink-soft">/ 100</p>
+      </div>
+      <div className="mt-4 h-3 w-full origin-left bg-line">
+        <div
+          className={`animate-bar h-full origin-left ${RISK_FILL[riskLevel]}`}
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <div className="mt-1 flex justify-between text-[11px] font-medium text-ink-soft">
+        <span>0</span>
+        <span>50</span>
+        <span>100</span>
       </div>
     </div>
   )

@@ -7,15 +7,19 @@ interface ExampleButtonsProps {
 
 export function ExampleButtons({ onLoad, activeId }: ExampleButtonsProps) {
   return (
-    <fieldset className="space-y-3">
-      <legend className="font-display text-base font-semibold text-ink">
+    <fieldset>
+      <legend className="font-display text-base font-bold text-ink">
         Load example
       </legend>
-      <p className="text-sm text-ink-soft">
-        Try one of three sample messages: ordinary, suspicious, or uncertain.
+      <p className="mt-1 text-sm text-ink-soft">
+        Ordinary, suspicious, or uncertain sample messages.
       </p>
-      <div className="grid gap-2 sm:grid-cols-3" role="group" aria-label="Example messages">
-        {EXAMPLE_MESSAGES.map((example) => {
+      <div
+        className="mt-4 flex flex-col gap-0 border-y border-line sm:flex-row"
+        role="group"
+        aria-label="Example messages"
+      >
+        {EXAMPLE_MESSAGES.map((example, index) => {
           const isActive = activeId === example.id
           return (
             <button
@@ -23,16 +27,22 @@ export function ExampleButtons({ onLoad, activeId }: ExampleButtonsProps) {
               type="button"
               onClick={() => onLoad(example.id)}
               aria-pressed={isActive}
-              className={`rounded-2xl border px-4 py-3 text-left transition ${
+              className={`flex-1 px-4 py-3 text-left transition ${
+                index > 0 ? 'border-t border-line sm:border-t-0 sm:border-l' : ''
+              } ${
                 isActive
-                  ? 'border-brand bg-brand-soft shadow-[0_0_0_1px_rgba(15,76,70,0.15)]'
-                  : 'border-line bg-panel hover:border-brand/35'
+                  ? 'bg-brand text-sheet'
+                  : 'bg-white text-ink hover:bg-paper'
               }`}
             >
-              <span className="block font-display text-sm font-semibold text-ink">
+              <span className="block font-display text-sm font-bold">
                 {example.label}
               </span>
-              <span className="mt-1 block text-xs leading-snug text-ink-soft">
+              <span
+                className={`mt-1 block text-xs leading-snug ${
+                  isActive ? 'text-paper/85' : 'text-ink-soft'
+                }`}
+              >
                 {example.description}
               </span>
             </button>

@@ -16,15 +16,15 @@ export function MessageInput({
   const charCount = value.length
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-end justify-between gap-3">
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-2">
         <label
           htmlFor="message-input"
-          className="font-display text-lg font-semibold text-ink"
+          className="font-display text-xl font-bold tracking-tight text-ink"
         >
           Paste a message to check
         </label>
-        <span className="text-xs font-medium text-ink-soft" aria-live="polite">
+        <span className="text-sm text-ink-soft" aria-live="polite">
           {charCount.toLocaleString()} characters
         </span>
       </div>
@@ -32,11 +32,11 @@ export function MessageInput({
       <textarea
         id="message-input"
         name="message"
-        rows={8}
+        rows={9}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder="Paste an SMS, email body, or chat message here…"
-        className="w-full resize-y rounded-2xl border border-line bg-panel px-4 py-3 text-base leading-relaxed text-ink shadow-[inset_0_1px_2px_rgba(15,76,70,0.04)] placeholder:text-ink-soft/70 focus-visible:border-accent"
+        className="w-full resize-y border border-line bg-white px-4 py-3 text-base leading-relaxed text-ink placeholder:text-ink-soft/80"
         spellCheck
         autoComplete="off"
         disabled={disabled}
@@ -44,13 +44,13 @@ export function MessageInput({
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-ink-soft">
-          Checking runs entirely in your browser. Nothing is uploaded.
+          Checking runs in your browser. Nothing is uploaded.
         </p>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={onClear}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-line bg-panel px-4 text-sm font-semibold text-ink-muted transition hover:border-brand/30 hover:text-ink"
+            className="inline-flex min-h-11 items-center justify-center border border-line bg-white px-4 text-sm font-semibold text-ink-muted transition hover:border-ink hover:text-ink"
           >
             Clear
           </button>
@@ -58,7 +58,7 @@ export function MessageInput({
             type="button"
             onClick={onCheck}
             disabled={disabled || value.trim().length === 0}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand px-5 text-sm font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,76,70,0.8)] transition hover:bg-brand-deep disabled:cursor-not-allowed disabled:bg-brand/40 disabled:shadow-none"
+            className="inline-flex min-h-11 items-center justify-center bg-brand px-5 text-sm font-semibold text-sheet transition hover:bg-brand-deep disabled:cursor-not-allowed disabled:bg-ink-soft"
           >
             Check message
           </button>

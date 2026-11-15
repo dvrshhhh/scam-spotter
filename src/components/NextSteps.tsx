@@ -1,5 +1,3 @@
-import { CheckCircle2 } from 'lucide-react'
-
 interface NextStepsProps {
   steps: string[]
 }
@@ -10,10 +8,10 @@ export function NextSteps({ steps }: NextStepsProps) {
       {steps.map((step, index) => (
         <li key={index} className="flex gap-3 text-sm leading-relaxed text-ink-muted">
           <span
-            className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand"
+            className="font-display w-6 shrink-0 text-base font-bold text-signal"
             aria-hidden="true"
           >
-            <CheckCircle2 className="h-3.5 w-3.5" />
+            {String(index + 1).padStart(2, '0')}
           </span>
           <span>
             <span className="sr-only">Step {index + 1}: </span>

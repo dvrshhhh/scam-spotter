@@ -38,7 +38,6 @@ export default function App() {
     setStatusText(
       `Result updated: ${next.riskLabel}, score ${next.score} out of 100, ${next.signals.length} warning sign${next.signals.length === 1 ? '' : 's'} detected.`,
     )
-    // Move keyboard users toward the result after analysis
     window.requestAnimationFrame(() => {
       resultRef.current?.focus()
     })
@@ -67,7 +66,9 @@ export default function App() {
     setActiveExample(kind)
     setResult(null)
     setSaveStatus(null)
-    setStatusText(`Loaded the ${example.label.toLowerCase()} example. Choose Check message to analyze it.`)
+    setStatusText(
+      `Loaded the ${example.label.toLowerCase()} example. Choose Check message to analyze it.`,
+    )
   }
 
   function handleSaveScan() {
@@ -99,89 +100,85 @@ export default function App() {
   }
 
   return (
-    <div className="bg-grid-soft min-h-screen">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
-        <AppHeader />
+    <div className="min-h-screen">
+      <AppHeader />
 
-        <main className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-          <section className="space-y-5 rounded-[1.75rem] border border-line bg-panel/95 p-5 shadow-[0_18px_50px_-34px_rgba(15,76,70,0.55)] sm:p-6">
-            <MessageInput
-              value={message}
-              onChange={(value) => {
-                setMessage(value)
-                setActiveExample(null)
-              }}
-              onCheck={handleCheck}
-              onClear={handleClear}
-            />
-            <div className="border-t border-line pt-5">
-              <ExampleButtons
-                onLoad={handleLoadExample}
-                activeId={activeExample}
-              />
-            </div>
-          </section>
+      <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        <main className="sheet px-5 py-6 sm:px-7 sm:py-8">
+          <MessageInput
+            value={message}
+            onChange={(value) => {
+              setMessage(value)
+              setActiveExample(null)
+            }}
+            onCheck={handleCheck}
+            onClear={handleClear}
+          />
 
-          <div className="space-y-5">
-            <PrivacyNote
-              onSaveScan={handleSaveScan}
-              saveEnabled={Boolean(result)}
-              saveStatus={saveStatus}
-            />
-
-            <section
-              className="rounded-[1.75rem] border border-dashed border-brand/25 bg-brand-soft/35 p-5 sm:p-6"
-              aria-labelledby="limitations-heading"
-            >
-              <h2
-                id="limitations-heading"
-                className="font-display text-base font-semibold text-ink"
-              >
-                Limitations
-              </h2>
-              <ul className="mt-2 space-y-2 text-sm leading-relaxed text-ink-muted">
-                <li>
-                  Rule-based checks catch common English phishing patterns; they
-                  can miss new wording and can flag legitimate messages.
-                </li>
-                <li>
-                  No remote AI is used. Core checking works offline after
-                  dependencies are installed.
-                </li>
-                <li>
-                  Always verify through official apps, websites, or numbers you
-                  already trust.
-                </li>
-              </ul>
-            </section>
+          <div className="mt-8">
+            <ExampleButtons onLoad={handleLoadExample} activeId={activeExample} />
           </div>
         </main>
+
+        <div className="mt-6">
+          <PrivacyNote
+            onSaveScan={handleSaveScan}
+            saveEnabled={Boolean(result)}
+            saveStatus={saveStatus}
+          />
+        </div>
 
         <div
           ref={resultRef}
           tabIndex={-1}
-          className="outline-none"
+          className="mt-10 outline-none"
           aria-labelledby={result ? 'result-heading' : undefined}
         >
           {result ? (
             <RiskResult result={result} />
           ) : (
             <section
-              className="rounded-[1.75rem] border border-line bg-panel/80 px-5 py-8 text-center shadow-[0_10px_40px_-28px_rgba(15,76,70,0.35)] sm:px-8"
+              className="border border-dashed border-line bg-sheet/70 px-5 py-8 sm:px-7"
               aria-label="Results placeholder"
             >
-              <p className="font-display text-xl font-semibold text-ink">
-                Results will appear here
+              <p className="font-display text-xl font-bold text-ink">
+                Results appear after you check a message
               </p>
-              <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
-                After you check a message, you will see a risk level, a 0–100
-                score meter, matched warning signs, and practical next steps.
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">
+                You will get a risk level, a 0–100 score, matched warning signs,
+                and practical next steps.
               </p>
             </section>
           )}
         </div>
 
-        <footer className="border-t border-line/80 pt-4 text-sm text-ink-soft">
+        <section
+          className="mt-10 border-t border-line pt-6"
+          aria-labelledby="limitations-heading"
+        >
+          <h2
+            id="limitations-heading"
+            className="font-display text-base font-bold text-ink"
+          >
+            Limitations
+          </h2>
+          <ul className="mt-2 max-w-3xl space-y-2 text-sm leading-relaxed text-ink-muted">
+            <li>
+              Rule-based checks catch common English phishing patterns; they can
+              miss new wording and can flag legitimate messages.
+            </li>
+            <li>
+              No remote AI is used. Core checking works offline after
+              dependencies are installed.
+            </li>
+            <li>
+              Always verify through official apps, websites, or numbers you
+              already trust.
+            </li>
+          </ul>
+        </section>
+
+        <footer className="mt-8 border-t border-line pt-4 text-sm text-ink-soft">
           <p>
             Scam Message Checker — educational aid for a third-year BTech
             Engineering Innovation Project. Not a substitute for official fraud
