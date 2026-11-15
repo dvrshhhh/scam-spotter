@@ -7,8 +7,8 @@ export function AppHeader() {
         </p>
         <div className="max-w-3xl">
           <h1 className="font-display text-[2.35rem] font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-[3.4rem]">
-            Scam Message
-            <span className="relative ml-0 block sm:ml-3 sm:inline">
+            <span className="block sm:inline">Scam Message </span>
+            <span className="relative mt-1 inline-block sm:mt-0">
               Checker
               <span
                 className="brand-underline absolute -bottom-1 left-0 h-1 w-full origin-left bg-signal"
