@@ -1,4 +1,10 @@
 import type { DetectionRule } from './types'
+import {
+  countUrls,
+  findResidualUrl,
+  findStrictSuspiciousUrl,
+  hasClickPressure,
+} from './urlSignals'
 
 /**
  * Rule catalogue for Scam Message Checker.
@@ -8,17 +14,9 @@ import type { DetectionRule } from './types'
  * - Several moderate signals can accumulate into "Review carefully".
  * - High risk usually needs a strong ask plus pressure/channel, or stacked categories.
  * - Patterns favor common English (and common India-facing) scam phrasing.
+ * - URL checks are intentionally strict: shorteners, risky TLDs, brand spoofs,
+ *   sensitive paths, punycode, and click-pressure all raise concern.
  */
-
-const URL_PATTERN =
-  /(?:https?:\/\/|www\.)[^\s<>"')\]]+|bit\.ly\/\w+|t\.co\/\w+|tinyurl\.com\/\w+|goo\.gl\/\w+|rb\.gy\/\w+/gi
-
-const SHORTENER_HOSTS =
-  /(?:bit\.ly|t\.co|tinyurl\.com|goo\.gl|rb\.gy|ow\.ly|is\.gd|cutt\.ly|rebrand\.ly|shorturl\.at|bl\.ink|tiny\.cc)\b/i
-
-/** Domains that often appear in phishing lookalikes (typosquats / odd TLDs). */
-const LOOKALIKE_HINT =
-  /(?:[a-z0-9-]+\.)?(?:paypa1|micros0ft|app1e|amaz0n|netf1ix|faceb00k|go0gle|banks?[-]?secure|account[-]?verify|login[-]?secure|sbi[-]?secure|hdfc[-]?verify|icici[-]?secure)\.[a-z]{2,}/i
 
 function findFirstMatch(text: string, patterns: RegExp[]): string | null {
   for (const pattern of patterns) {
@@ -32,42 +30,6 @@ function findFirstMatch(text: string, patterns: RegExp[]): string | null {
     }
   }
   return null
-}
-
-function extractHighRiskLinks(text: string): string | null {
-  const urls = text.match(URL_PATTERN)
-  if (!urls || urls.length === 0) return null
-
-  for (const raw of urls) {
-    const cleaned = raw.replace(/[.,;:!?)]+$/, '')
-    if (SHORTENER_HOSTS.test(cleaned)) {
-      return cleaned
-    }
-    if (LOOKALIKE_HINT.test(cleaned)) {
-      return cleaned
-    }
-    if (/https?:\/\/\d{1,3}(?:\.\d{1,3}){3}/i.test(cleaned)) {
-      return cleaned
-    }
-    // Login / verify / secure path on an unexpected host
-    if (
-      /https?:\/\/[^\s/]+\/(?:login|signin|verify|secure|account|update|kyc)/i.test(
-        cleaned,
-      )
-    ) {
-      return cleaned
-    }
-  }
-
-  return null
-}
-
-function extractAnyLink(text: string): string | null {
-  // Avoid double-counting when a high-risk link already matches
-  if (extractHighRiskLinks(text)) return null
-  const urls = text.match(URL_PATTERN)
-  if (!urls || urls.length === 0) return null
-  return urls[0].replace(/[.,;:!?)]+$/, '')
 }
 
 export const DETECTION_RULES: DetectionRule[] = [
@@ -183,22 +145,54 @@ export const DETECTION_RULES: DetectionRule[] = [
   {
     id: 'suspicious-links',
     category: 'links',
-    title: 'Shortened or lookalike / login URLs',
+    title: 'Suspicious or high-risk URL',
     explanation:
-      'Shortened links hide the real destination. Lookalike domains and unexpected login or KYC URLs often lead to phishing pages.',
-    weight: 16,
+      'Strict URL checks flag shorteners, risky TLDs, brand-spoof hosts, IP addresses, punycode, @-style tricks, insecure HTTP on sensitive pages, and login/KYC-style paths.',
+    weight: 18,
     patterns: [],
-    test: (text) => extractHighRiskLinks(text),
+    test: (text) => findStrictSuspiciousUrl(text),
   },
   {
     id: 'generic-link',
     category: 'links',
     title: 'Contains a web link',
     explanation:
-      'Any unexpected link deserves caution, especially with pressure to click. On its own this is a weak signal.',
+      'Under a strict policy, any unexpected link is treated as a caution signal even when the host does not look obviously fake.',
+    weight: 12,
+    patterns: [],
+    test: (text) => findResidualUrl(text),
+  },
+  {
+    id: 'url-click-pressure',
+    category: 'links',
+    title: 'Pressures you to open a link',
+    explanation:
+      'Phrases like "click here" or "verify here" next to a URL are common phishing prompts.',
+    weight: 10,
+    patterns: [],
+    test: (text) => {
+      if (!hasClickPressure(text)) return null
+      if (countUrls(text) === 0 && !/\b(?:link|url)\b/i.test(text)) return null
+      return (
+        findStrictSuspiciousUrl(text) ??
+        findResidualUrl(text) ??
+        'click here / open link'
+      )
+    },
+  },
+  {
+    id: 'multiple-urls',
+    category: 'links',
+    title: 'Multiple links in one message',
+    explanation:
+      'Scam blasts often pack several links. More than one URL in a short message is a useful caution flag.',
     weight: 8,
     patterns: [],
-    test: (text) => extractAnyLink(text),
+    test: (text) => {
+      const n = countUrls(text)
+      if (n < 2) return null
+      return `${n} links`
+    },
   },
   {
     id: 'software-attachments',

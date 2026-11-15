@@ -56,7 +56,7 @@ The checker is **rule-based TypeScript** under `src/detection/`:
 
 1. Text is **normalized** first (spacing tricks, lookalike characters, light obfuscation) so wording like `p a s s w o r d` still matches.
 2. Each matched rule contributes its **weight** (roughly 8 to 28). Stronger hallmarks (password/OTP asks, KYC/UPI asks, gift-card/bank asks) weigh more than weaker cues (a lone ordinary link).
-3. Shortened / lookalike / login URLs score higher than a generic link.
+3. URL checks are **strict**: shorteners, risky TLDs, brand-spoof hosts, IP hosts, punycode, `@` tricks, sensitive paths (login/KYC/otp), insecure HTTP on those paths, click-here pressure, and multiple links all raise the score. A plain leftover URL still counts as a caution signal.
 4. If hits span **3+ categories**, a **diversity bonus (+8)** is added.
 5. **Dangerous combo bonuses** apply when known stacks appear together (for example credentials + urgency, impersonation + link), capped so overlaps cannot runaway-score.
 6. The total is capped at **100**.

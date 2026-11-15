@@ -56,6 +56,27 @@ const cases: Expectation[] = [
     risk: 'low',
     maxScore: 29,
   },
+  {
+    id: 'shortener-click-pressure',
+    text: 'Click here to unlock your parcel: https://bit.ly/track991 immediately.',
+    risk: 'review',
+    minScore: 30,
+    mustIncludeRule: ['suspicious-links', 'url-click-pressure'],
+  },
+  {
+    id: 'brand-spoof-url',
+    text: 'PayPal Security: confirm billing at https://paypa1-secure-login.xyz/verify',
+    risk: 'review',
+    minScore: 30,
+    mustIncludeRule: ['suspicious-links'],
+  },
+  {
+    id: 'multi-url-blast',
+    text: 'Claim your refund now http://192.168.0.8/pay or use backup https://rb.gy/abc123 today.',
+    risk: 'review',
+    minScore: 30,
+    mustIncludeRule: ['multiple-urls', 'suspicious-links'],
+  },
 ]
 
 let failed = 0
