@@ -13,6 +13,14 @@ npm run dev
 
 Then open the local URL printed by Vite (configured for `http://127.0.0.1:4731`).
 
+### GitHub Pages
+
+Pushes to `main` build and deploy a static site at:
+
+**https://riowgmi.github.io/scam-spotter/**
+
+The repo must allow GitHub Pages (public repos work on Free; private repos need a paid GitHub plan). In the repo: **Settings → Pages → Source: GitHub Actions**.
+
 Other scripts:
 
 ```bash
