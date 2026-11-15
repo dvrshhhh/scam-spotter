@@ -9,9 +9,9 @@ import type { DetectedSignal, RiskLevel } from './types'
  * 3. Cap the final score at 100.
  * 4. Map to risk bands with conservative thresholds:
  *
- *    0–29  → Low risk          (few/weak signals; still not a guarantee of safety)
- *    30–59 → Review carefully  (enough to warrant caution and manual verification)
- *    60–100→ High risk         (strong credential/payment asks and/or stacked signals)
+ *    0 to 29   -> Low risk          (few/weak signals; still not a guarantee of safety)
+ *    30 to 59  -> Review carefully  (enough to warrant caution and manual verification)
+ *    60 to 100 -> High risk         (strong credential/payment asks and/or stacked signals)
  *
  * Important guardrails:
  * - A single weak signal (e.g. only a generic link, weight ~12) stays Low.
@@ -23,7 +23,7 @@ export const SCORE_CAP = 100
 export const LOW_MAX = 29
 export const REVIEW_MAX = 59
 
-/** Bonus when hits span many categories — stacked social engineering. */
+/** Bonus when hits span many categories (stacked social engineering). */
 export const DIVERSITY_BONUS_THRESHOLD = 3
 export const DIVERSITY_BONUS_POINTS = 8
 
@@ -70,10 +70,10 @@ export function summaryFor(
   switch (level) {
     case 'low':
       return signalCount === 0
-        ? 'No common warning signs were detected. That does not prove the message is genuine—stay cautious with unexpected requests.'
+        ? 'No common warning signs were detected. That does not prove the message is genuine. Stay cautious with unexpected requests.'
         : 'Only weak or limited warning signs were found. Treat unexpected requests carefully and verify through official channels.'
     case 'review':
-      return 'Several warning signs appear in this message. Pause before clicking links, sharing codes, or sending money—verify independently.'
+      return 'Several warning signs appear in this message. Pause before clicking links, sharing codes, or sending money. Verify independently.'
     case 'high':
       return 'Strong scam-like warning signs were detected. Do not share codes, passwords, or payments from this message. Contact the organization only through a channel you already trust.'
   }
@@ -83,7 +83,7 @@ export function nextStepsFor(level: RiskLevel): string[] {
   const shared = [
     'Do not share passwords, PINs, one-time passwords, or verification codes from this message.',
     'Avoid tapping links in unexpected messages. Open the official app or type a website address you already trust.',
-    'Contact the organization using a phone number or channel you already have—not one supplied only in the message.',
+    'Contact the organization using a phone number or channel you already have, not one supplied only in the message.',
     'This tool flags common patterns and can be wrong. When unsure, ask a trusted person or official support.',
   ]
 

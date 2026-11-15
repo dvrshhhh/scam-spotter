@@ -29,7 +29,7 @@ export interface DetectionRule {
   /** Why this pattern matters. */
   explanation: string
   /**
-   * Relative weight (roughly 8–28).
+   * Relative weight (roughly 8 to 28).
    * Stronger scam hallmarks (credential asks, gift cards) score higher.
    * Weaker cues (a single generic "urgent") score lower.
    */

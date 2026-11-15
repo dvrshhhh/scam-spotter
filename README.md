@@ -27,11 +27,11 @@ npm run lint     # oxlint
 2. Choose **Check message**.
 3. Review:
    - Risk level: **Low risk**, **Review carefully**, or **High risk**
-   - Score meter from 0–100
+   - Score meter from 0 to 100
    - Each matched warning sign with excerpt / explanation
    - Practical next steps
 4. Use **Clear** or **Load example** (ordinary / suspicious / uncertain).
-5. Optionally **Save this scan locally** (stores risk metadata on the device—not the full message text by default).
+5. Optionally **Save this scan locally** (stores risk metadata on the device, not the full message text by default).
 
 ## Privacy
 
@@ -53,13 +53,13 @@ The checker is **rule-based TypeScript** under `src/detection/`:
 
 ### Scoring approach
 
-1. Each matched rule contributes its **weight** (roughly 8–28). Stronger hallmarks (password/OTP asks, gift-card/bank asks) weigh more than weaker cues (a lone link).
-2. If hits span **3+ categories**, a small **diversity bonus (+8)** is added—scams often stack pressure + ask + channel.
+1. Each matched rule contributes its **weight** (roughly 8 to 28). Stronger hallmarks (password/OTP asks, gift-card/bank asks) weigh more than weaker cues (a lone link).
+2. If hits span **3+ categories**, a small **diversity bonus (+8)** is added. Scams often stack pressure, ask, and channel.
 3. The total is capped at **100**.
 4. Threshold bands:
-   - **0–29** → Low risk
-   - **30–59** → Review carefully
-   - **60–100** → High risk
+   - **0 to 29**: Low risk
+   - **30 to 59**: Review carefully
+   - **60 to 100**: High risk
 
 A single weak signal does **not** auto-escalate to High risk. The UI shows matched text, weights, and expandable scoring notes so the outcome stays explainable.
 
@@ -73,9 +73,9 @@ A single weak signal does **not** auto-escalate to High risk. The UI shows match
 ## Project demo guide (short)
 
 1. Start the app with `npm install` then `npm run dev`.
-2. Load the **Ordinary** example → **Check message** → expect **Low risk**.
-3. Load the **Uncertain** example → expect **Review carefully** (link + urgency/update pressure).
-4. Load the **Suspicious** example → expect **High risk** with multiple stacked warning signs.
+2. Load the **Ordinary** example, then **Check message**. Expect **Low risk**.
+3. Load the **Uncertain** example. Expect **Review carefully** (link plus urgency/update pressure).
+4. Load the **Suspicious** example. Expect **High risk** with multiple stacked warning signs.
 5. Point out the privacy note: analysis is local; optional save stores only a summary.
 6. Expand **How scoring worked** to show transparent weights and thresholds.
 

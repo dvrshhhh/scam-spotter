@@ -11,7 +11,7 @@ export function WarningList({ signals }: WarningListProps) {
         <p className="font-semibold text-ink">No warning signs matched</p>
         <p className="mt-1 leading-relaxed">
           The rule-based checker did not find common scam patterns. Novel
-          wording can still be harmful—verify unexpected requests yourself.
+          wording can still be harmful. Verify unexpected requests yourself.
         </p>
       </div>
     )

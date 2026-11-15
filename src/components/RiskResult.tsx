@@ -63,7 +63,7 @@ export function RiskResult({ result }: RiskResultProps) {
               {result.summary}
             </p>
             <p className="mt-4 text-sm font-medium text-ink">
-              Educational aid — not proof a message is genuine or a scam.
+              Educational aid only. This is not proof a message is genuine or a scam.
             </p>
           </div>
         </div>
@@ -110,11 +110,11 @@ export function RiskResult({ result }: RiskResultProps) {
             {showScoring && (
               <ul
                 id={detailsId}
-                className="animate-fade mt-3 space-y-2 text-sm text-ink-muted"
+                className="animate-fade mt-3 list-disc space-y-2 pl-5 text-sm text-ink-muted"
               >
                 {result.scoringNotes.map((note) => (
                   <li key={note} className="leading-relaxed">
-                    — {note}
+                    {note}
                   </li>
                 ))}
               </ul>

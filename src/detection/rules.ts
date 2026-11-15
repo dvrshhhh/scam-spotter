@@ -170,7 +170,7 @@ export const DETECTION_RULES: DetectionRule[] = [
     category: 'impersonation',
     title: 'Possible impersonation of a trusted organization',
     explanation:
-      'Messages that claim to be from banks, delivery services, tax offices, or tech support—especially with odd wording—deserve extra scrutiny.',
+      'Messages that claim to be from banks, delivery services, tax offices, or tech support (especially with odd wording) deserve extra scrutiny.',
     weight: 15,
     patterns: [
       /\b(?:this\s+is|we\s+are|calling\s+from)\s+(?:your\s+)?(?:bank|support|security\s+team)\b/i,

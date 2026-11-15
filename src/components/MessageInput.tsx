@@ -35,7 +35,7 @@ export function MessageInput({
         rows={9}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="Paste an SMS, email body, or chat message here…"
+        placeholder="Paste an SMS, email body, or chat message here..."
         className="w-full resize-y border border-line bg-white px-4 py-3 text-base leading-relaxed text-ink placeholder:text-ink-soft/80"
         spellCheck
         autoComplete="off"

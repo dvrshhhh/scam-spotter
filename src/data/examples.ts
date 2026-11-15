@@ -12,13 +12,13 @@ export const EXAMPLE_MESSAGES: ExampleMessage[] = [
     id: 'ordinary',
     label: 'Ordinary',
     description: 'Everyday message with little scam language',
-    text: `Hi Maya — running 10 minutes late for coffee. See you at the usual café near campus. No rush!`,
+    text: `Hi Maya, running 10 minutes late for coffee. See you at the usual cafe near campus. No rush!`,
   },
   {
     id: 'suspicious',
     label: 'Suspicious',
     description: 'Stacked pressure, credentials, and a shady link',
-    text: `FINAL NOTICE from your Bank Security Team: Your account will be suspended within 2 hours. Confirm your password and OTP immediately at http://secure-bank-login.paypa1-verify.ru/login or we will take legal action. Keep this confidential — do not tell anyone.`,
+    text: `FINAL NOTICE from your Bank Security Team: Your account will be suspended within 2 hours. Confirm your password and OTP immediately at http://secure-bank-login.paypa1-verify.ru/login or we will take legal action. Keep this confidential. Do not tell anyone.`,
   },
   {
     id: 'uncertain',

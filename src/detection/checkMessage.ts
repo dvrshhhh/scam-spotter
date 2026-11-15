@@ -60,7 +60,7 @@ export function checkMessage(rawText: string): CheckResult {
   }
 
   scoringNotes.push(
-    `Final score: ${score}/100 → ${riskLabel(riskLevel)} (bands: 0–${LOW_MAX} low, ${LOW_MAX + 1}–${REVIEW_MAX} review, ${REVIEW_MAX + 1}–100 high).`,
+    `Final score: ${score}/100 -> ${riskLabel(riskLevel)} (bands: 0 to ${LOW_MAX} low, ${LOW_MAX + 1} to ${REVIEW_MAX} review, ${REVIEW_MAX + 1} to 100 high).`,
   )
 
   if (signals.length === 1 && riskLevel !== 'high') {
@@ -83,5 +83,5 @@ export function checkMessage(rawText: string): CheckResult {
 function clipMatch(value: string, max = 80): string {
   const normalized = value.replace(/\s+/g, ' ').trim()
   if (normalized.length <= max) return normalized
-  return `${normalized.slice(0, max - 1)}…`
+  return `${normalized.slice(0, max - 1)}...`
 }

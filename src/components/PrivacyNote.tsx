@@ -23,7 +23,7 @@ export function PrivacyNote({
       <ul className="mt-2 space-y-2 text-sm leading-relaxed text-ink-muted">
         <li>
           Checking is <strong className="font-semibold text-ink">local</strong>.
-          Text stays in this browser—no upload, no remote AI.
+          Text stays in this browser. There is no upload and no remote AI.
         </li>
         <li>
           Contents are{' '}

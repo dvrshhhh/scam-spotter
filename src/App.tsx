@@ -91,7 +91,7 @@ export default function App() {
       const next = [entry, ...existing].slice(0, 20)
       window.localStorage.setItem(SAVE_KEY, JSON.stringify(next))
       setSaveStatus(
-        'Saved a scan summary on this device (risk, score, rule ids—not the full message text).',
+        'Saved a scan summary on this device (risk, score, and rule ids only, not the full message text).',
       )
       setStatusText('Scan summary saved locally on this device.')
     } catch {
@@ -145,7 +145,7 @@ export default function App() {
                 Results appear after you check a message
               </p>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">
-                You will get a risk level, a 0–100 score, matched warning signs,
+                You will get a risk level, a 0 to 100 score, matched warning signs,
                 and practical next steps.
               </p>
             </section>
@@ -180,9 +180,9 @@ export default function App() {
 
         <footer className="mt-8 border-t border-line pt-4 text-sm text-ink-soft">
           <p>
-            Scam Message Checker — educational aid for a third-year BTech
-            Engineering Innovation Project. Not a substitute for official fraud
-            guidance.
+            Scam Message Checker is an educational aid for a third-year BTech
+            Engineering Innovation Project. It is not a substitute for official
+            fraud guidance.
           </p>
         </footer>
       </div>

@@ -18,7 +18,7 @@ const RISK_MARK: Record<RiskLevel, string> = {
   high: '▣▣▣',
 }
 
-/** Horizontal 0–100 meter. Color is paired with text label + mark pattern. */
+/** Horizontal 0 to 100 meter. Color is paired with text label and mark pattern. */
 export function ScoreMeter({ score, riskLevel, riskLabel }: ScoreMeterProps) {
   const progress = Math.max(0, Math.min(100, score))
 
