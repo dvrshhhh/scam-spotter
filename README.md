@@ -15,11 +15,18 @@ Then open the local URL printed by Vite (configured for `http://127.0.0.1:4731`)
 
 ### GitHub Pages
 
-Pushes to `main` build and deploy a static site at:
+Static site URL (after Pages is enabled on the `gh-pages` branch):
 
 **https://riowgmi.github.io/scam-spotter/**
 
-The repo must allow GitHub Pages (public repos work on Free; private repos need a paid GitHub plan). In the repo: **Settings → Pages → Source: GitHub Actions**.
+Rebuild and publish the Pages branch:
+
+```bash
+VITE_BASE=/scam-spotter/ npm run build
+# then publish the dist/ folder to the gh-pages branch
+```
+
+The repo must allow GitHub Pages (public repos work on Free; private repos need a paid GitHub plan). In **Settings → Pages**, set Source to **Deploy from a branch**, branch `gh-pages`, folder `/`.
 
 Other scripts:
 
