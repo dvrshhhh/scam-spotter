@@ -17,7 +17,7 @@ Then open the local URL printed by Vite (configured for `http://127.0.0.1:4731`)
 
 Static site URL (after Pages is enabled on the `gh-pages` branch):
 
-**https://riowgmi.github.io/scam-spotter/**
+**https://dvrshhhh.github.io/scam-spotter/**
 
 Rebuild and publish the Pages branch:
 
