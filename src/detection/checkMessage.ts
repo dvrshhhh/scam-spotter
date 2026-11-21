@@ -93,7 +93,40 @@ export function checkMessage(rawText: string): CheckResult {
     signals,
     nextSteps: nextStepsFor(riskLevel),
     scoringNotes,
+    breakdown: {
+      raw,
+      diversityBonus,
+      comboBonus,
+      comboHits: comboNotes.filter((note) => !note.startsWith('Combo bonus capped')),
+      categories,
+    },
+    improveTip: improveTipFor(signals, categories, score),
   }
+}
+
+function improveTipFor(
+  signals: DetectedSignal[],
+  categories: string[],
+  score: number,
+): string {
+  if (signals.length === 0) {
+    return 'No warning signs matched. A clean score does not prove the message is safe. Still verify unexpected requests.'
+  }
+  if (score >= 60) {
+    return 'This score is already high because strong asks and stacked tactics lined up. Do not interact. Verify only through official apps or numbers you already trust.'
+  }
+  const hasLinks = categories.includes('links')
+  const hasCredentials = categories.includes('credentials')
+  if (hasLinks && !hasCredentials) {
+    return 'A credential or payment ask on top of this link would raise the score further. Avoid opening unexpected links.'
+  }
+  if (!hasLinks && (hasCredentials || categories.includes('money'))) {
+    return 'Adding a suspicious or shortened link to this ask would usually push the score higher. Treat unexpected payment or OTP requests as high caution.'
+  }
+  if (categories.length < 3) {
+    return 'More distinct scam categories (pressure + ask + channel) would increase the score via the diversity bonus.'
+  }
+  return 'Stacked social-engineering patterns raise the score. Pause and verify through a channel you already trust.'
 }
 
 function clipMatch(value: string, max = 80): string {

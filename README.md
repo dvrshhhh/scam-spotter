@@ -38,15 +38,12 @@ npm run lint     # oxlint
 
 ## What you can do in the app
 
-1. Paste a message into the large text area.
-2. Choose **Check message**.
-3. Review:
-   - Risk level: **Low risk**, **Review carefully**, or **High risk**
-   - Score meter from 0 to 100
-   - Each matched warning sign with excerpt / explanation
-   - Practical next steps
-4. Use **Clear** or **Load example** (ordinary / suspicious / uncertain).
-5. Optionally **Save this scan locally** (stores risk metadata on the device, not the full message text by default).
+Four tabs keep the checker central while making the demo feel like a fuller product:
+
+1. **Checker** — paste a message, load examples (including India-focused KYC / UPI / courier samples), see risk level, score, warning signs, **Why this score** (weights, combos, tip), and next steps.
+2. **Link check** — inspect a URL with the same local heuristics (shorteners, spoofs, risky TLDs, sensitive paths). Nothing is fetched remotely.
+3. **Learn** — common scam types (OTP phishing, fake KYC, UPI collect, courier fees, job/investment) plus quick safety tips.
+4. **History** — view or clear scan summaries you explicitly saved on this device (risk/score/rule ids only; message text is not stored by default).
 
 ## Privacy
 
@@ -96,20 +93,20 @@ npm run test:detection   # regression checks for examples + edge cases
 ## Project demo guide (short)
 
 1. Start the app with `npm install` then `npm run dev`.
-2. Load the **Ordinary** example, then **Check message**. Expect **Low risk**.
-3. Load the **Uncertain** example. Expect **Review carefully** (link plus urgency/update pressure).
-4. Load the **Suspicious** example. Expect **High risk** with multiple stacked warning signs.
-5. Point out the privacy note: analysis is local; optional save stores only a summary.
-6. Expand **How scoring worked** to show transparent weights and thresholds.
+2. On **Checker**, load **Ordinary** → **Check message**. Expect **Low risk**.
+3. Load **Fake KYC** or **UPI collect**. Expect **High risk** and open **Why this score**.
+4. Open **Link check**, try `bit.ly` / lookalike samples.
+5. Open **Learn** and walk through one scam type (KYC or UPI).
+6. Save a scan, then open **History** to show on-device summaries only.
 
 ## Suggested project structure
 
 ```
 src/
-  components/     Message input, risk result, meter, warnings, examples, privacy
-  data/           Example messages
-  detection/      Rules, scoring, checker
-  App.tsx         Dashboard composition
+  components/     Checker UI, link helper, learn guide, history, nav
+  data/           Examples + scam guide copy
+  detection/      Rules, scoring, URL heuristics, checker
+  App.tsx         Tabbed product shell
 ```
 
 ## License

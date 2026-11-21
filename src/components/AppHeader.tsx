@@ -17,9 +17,10 @@ export function AppHeader() {
             </span>
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-paper/90 sm:text-lg">
-            Paste a suspicious SMS, email, or chat message. See warning signs,
-            a transparent score, and safer next steps. This is an educational
-            aid, not proof that a message is genuine or a scam.
+            Check suspicious messages, inspect risky links, learn common scam
+            types, and review scans you choose to save. Analysis stays local in
+            your browser. Educational aid only, not proof a message is genuine
+            or a scam.
           </p>
         </div>
       </div>

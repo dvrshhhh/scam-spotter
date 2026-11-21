@@ -2,6 +2,7 @@ import { ChevronDown } from 'lucide-react'
 import { useId, useState } from 'react'
 import type { CheckResult } from '../detection/types'
 import { NextSteps } from './NextSteps'
+import { ScoreExplain } from './ScoreExplain'
 import { ScoreMeter } from './ScoreMeter'
 import { WarningList } from './WarningList'
 
@@ -68,6 +69,8 @@ export function RiskResult({ result }: RiskResultProps) {
           </div>
         </div>
       </div>
+
+      <ScoreExplain result={result} />
 
       <div className="grid gap-10 lg:grid-cols-2">
         <div>

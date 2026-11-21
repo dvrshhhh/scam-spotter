@@ -107,7 +107,21 @@ function tldOf(host: string): string {
   return parts[parts.length - 1] ?? ''
 }
 
-function analyzeOne(raw: string): UrlFinding {
+/** Human labels for URL heuristic reason codes. */
+export const URL_REASON_LABELS: Record<string, string> = {
+  'unparseable-url': 'Could not parse this as a normal web address',
+  'url-shortener': 'Uses a URL shortener that hides the real destination',
+  'ip-literal-host': 'Points at a raw IP address instead of a normal domain',
+  'punycode-host': 'Uses punycode (xn--) which can hide lookalike characters',
+  'userinfo-at-sign': 'Contains an @ trick that can disguise the real host',
+  'risky-tld': 'Uses a top-level domain often seen in disposable phishing sites',
+  'brand-spoof-host': 'Host name looks like a brand spoof, not an official domain',
+  'sensitive-path': 'Path looks like login, KYC, OTP, or account verification',
+  'insecure-http-sensitive': 'Uses insecure HTTP on a sensitive login-style page',
+  'security-themed-host': 'Host name leans on “secure / login / bank” wording',
+}
+
+export function analyzeOne(raw: string): UrlFinding {
   const url = stripTrailingPunctuation(raw)
   const reasons: string[] = []
   const host = hostFromUrl(url)
@@ -159,6 +173,11 @@ function analyzeOne(raw: string): UrlFinding {
   }
 
   return { url, reasons }
+}
+
+/** Analyze every URL found in free text (local heuristics only). */
+export function analyzeUrlsInText(text: string): UrlFinding[] {
+  return collectUrls(text).map((url) => analyzeOne(url))
 }
 
 function looksLikeBrandSpoof(host: string): boolean {

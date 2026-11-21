@@ -6,20 +6,52 @@ interface ExampleButtonsProps {
 }
 
 export function ExampleButtons({ onLoad, activeId }: ExampleButtonsProps) {
+  const general = EXAMPLE_MESSAGES.filter((item) => item.region !== 'india')
+  const india = EXAMPLE_MESSAGES.filter((item) => item.region === 'india')
+
+  return (
+    <div className="space-y-6">
+      <ExampleGroup
+        title="Load example"
+        description="Ordinary, uncertain, or clearly suspicious samples."
+        examples={general}
+        activeId={activeId}
+        onLoad={onLoad}
+      />
+      <ExampleGroup
+        title="India-focused examples"
+        description="KYC, UPI, and courier fee patterns useful for local demos."
+        examples={india}
+        activeId={activeId}
+        onLoad={onLoad}
+      />
+    </div>
+  )
+}
+
+function ExampleGroup({
+  title,
+  description,
+  examples,
+  activeId,
+  onLoad,
+}: {
+  title: string
+  description: string
+  examples: typeof EXAMPLE_MESSAGES
+  activeId?: ExampleKind | null
+  onLoad: (kind: ExampleKind) => void
+}) {
   return (
     <fieldset>
-      <legend className="font-display text-base font-bold text-ink">
-        Load example
-      </legend>
-      <p className="mt-1 text-sm text-ink-soft">
-        Ordinary, suspicious, or uncertain sample messages.
-      </p>
+      <legend className="font-display text-base font-bold text-ink">{title}</legend>
+      <p className="mt-1 text-sm text-ink-soft">{description}</p>
       <div
-        className="mt-4 flex flex-col gap-0 border-y border-line sm:flex-row"
+        className="mt-4 flex flex-col gap-0 border-y border-line sm:flex-row sm:flex-wrap"
         role="group"
-        aria-label="Example messages"
+        aria-label={title}
       >
-        {EXAMPLE_MESSAGES.map((example, index) => {
+        {examples.map((example, index) => {
           const isActive = activeId === example.id
           return (
             <button
@@ -27,7 +59,7 @@ export function ExampleButtons({ onLoad, activeId }: ExampleButtonsProps) {
               type="button"
               onClick={() => onLoad(example.id)}
               aria-pressed={isActive}
-              className={`flex-1 px-4 py-3 text-left transition ${
+              className={`flex-1 min-w-[10rem] px-4 py-3 text-left transition ${
                 index > 0 ? 'border-t border-line sm:border-t-0 sm:border-l' : ''
               } ${
                 isActive

@@ -56,6 +56,15 @@ export interface DetectedSignal {
   matchedText: string
 }
 
+export interface ScoreBreakdown {
+  raw: number
+  diversityBonus: number
+  comboBonus: number
+  /** Fired combo labels for the UI, e.g. "Credential ask plus urgency (+10)". */
+  comboHits: string[]
+  categories: SignalCategory[]
+}
+
 export interface CheckResult {
   score: number
   riskLevel: RiskLevel
@@ -68,4 +77,8 @@ export interface CheckResult {
    * (weights, caps, and threshold decisions).
    */
   scoringNotes: string[]
+  /** Structured explainability for the score panel. */
+  breakdown: ScoreBreakdown
+  /** Short tip describing what would most change this score. */
+  improveTip: string
 }
