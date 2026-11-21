@@ -65,10 +65,35 @@ export function RiskResult({ result }: RiskResultProps) {
             </p>
             <p className="mt-4 text-sm font-medium text-ink">
               Educational aid only. This is not proof a message is genuine or a scam.
+              The checker flags common warning signs and can make mistakes.
             </p>
           </div>
         </div>
       </div>
+
+      {result.patterns.length > 0 && (
+        <div className="sheet px-5 py-5 sm:px-6">
+          <h3 className="font-display text-lg font-bold text-ink">
+            Likely patterns
+          </h3>
+          <p className="mt-1 text-sm text-ink-soft">
+            Suggested by the clues above. Labels are educational, not a verdict.
+          </p>
+          <ul className="mt-4 space-y-3">
+            {result.patterns.map((pattern) => (
+              <li
+                key={pattern.id}
+                className="border-l-4 border-signal bg-white px-3 py-3"
+              >
+                <p className="font-display text-base font-bold text-ink">
+                  {pattern.label}
+                </p>
+                <p className="mt-1 text-sm text-ink-muted">{pattern.reason}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <ScoreExplain result={result} />
 

@@ -65,6 +65,13 @@ export interface ScoreBreakdown {
   categories: SignalCategory[]
 }
 
+/** High-level educational pattern labels (not a definitive scam verdict). */
+export interface ScamPattern {
+  id: string
+  label: string
+  reason: string
+}
+
 export interface CheckResult {
   score: number
   riskLevel: RiskLevel
@@ -81,4 +88,6 @@ export interface CheckResult {
   breakdown: ScoreBreakdown
   /** Short tip describing what would most change this score. */
   improveTip: string
+  /** Likely patterns suggested by the detected clues. */
+  patterns: ScamPattern[]
 }

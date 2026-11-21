@@ -1,16 +1,19 @@
+import type { RiskLevel, SignalCategory } from '../detection/types'
+
 export interface SavedScanMeta {
   savedAt: string
-  riskLevel: 'low' | 'review' | 'high'
+  riskLevel: RiskLevel
   riskLabel: string
-  score: number
-  signalIds: string[]
-  messagePreviewLength: number
+  /** Warning-sign categories only. Never store message text. */
+  categories: SignalCategory[]
 }
 
 interface ScanHistoryProps {
+  enabled: boolean
   scans: SavedScanMeta[]
+  onEnable: () => void
+  onDisable: () => void
   onClear: () => void
-  onRefresh: () => void
 }
 
 const RISK_TEXT = {
@@ -30,30 +33,44 @@ function formatWhen(iso: string): string {
   }
 }
 
-export function ScanHistory({ scans, onClear, onRefresh }: ScanHistoryProps) {
+export function ScanHistory({
+  enabled,
+  scans,
+  onEnable,
+  onDisable,
+  onClear,
+}: ScanHistoryProps) {
   return (
-    <section className="animate-rise space-y-6" aria-labelledby="history-heading">
-      <div className="sheet px-5 py-6 sm:px-7 sm:py-7">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h2
-              id="history-heading"
-              className="font-display text-2xl font-extrabold tracking-tight text-ink"
-            >
-              Saved scan history
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted sm:text-base">
-              Only summaries you explicitly saved appear here. Full message text
-              is not stored by default, only risk, score, rule ids, and length.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+    <section
+      className="sheet px-5 py-5 sm:px-6"
+      aria-labelledby="history-heading"
+    >
+      <h2 id="history-heading" className="font-display text-lg font-bold text-ink">
+        Optional scan history
+      </h2>
+      <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+        History is <strong className="text-ink">off by default</strong>. When
+        you enable it, this browser stores only the date, risk level, and
+        warning-sign categories. The original message text is never saved.
+      </p>
+
+      <div className="mt-4 flex flex-wrap gap-3">
+        {!enabled ? (
+          <button
+            type="button"
+            onClick={onEnable}
+            className="min-h-10 border border-brand bg-brand px-3 text-sm font-semibold text-sheet transition hover:bg-brand-deep"
+          >
+            Enable local history
+          </button>
+        ) : (
+          <>
             <button
               type="button"
-              onClick={onRefresh}
+              onClick={onDisable}
               className="min-h-10 border border-line bg-white px-3 text-sm font-semibold text-ink-muted transition hover:border-ink hover:text-ink"
             >
-              Refresh
+              Disable history
             </button>
             <button
               type="button"
@@ -63,40 +80,34 @@ export function ScanHistory({ scans, onClear, onRefresh }: ScanHistoryProps) {
             >
               Clear history
             </button>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
-      {scans.length === 0 ? (
-        <div className="border border-dashed border-line bg-sheet/70 px-5 py-8">
-          <p className="font-display text-xl font-bold text-ink">No saved scans yet</p>
-          <p className="mt-2 max-w-xl text-sm text-ink-soft">
-            Run the checker, then choose “Save this scan locally” on the Checker
-            tab. History stays on this device only.
-          </p>
-        </div>
-      ) : (
-        <ul className="space-y-3">
+      {enabled && scans.length === 0 && (
+        <p className="mt-4 text-sm text-ink-soft">
+          No saved summaries yet. After a check, use “Save this scan locally”.
+        </p>
+      )}
+
+      {enabled && scans.length > 0 && (
+        <ul className="mt-4 space-y-3">
           {scans.map((scan) => (
-            <li key={`${scan.savedAt}-${scan.score}`} className="sheet px-5 py-4">
+            <li
+              key={`${scan.savedAt}-${scan.riskLabel}`}
+              className="border border-line bg-white px-4 py-3"
+            >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <p className={`font-display text-lg font-bold ${RISK_TEXT[scan.riskLevel]}`}>
-                  {scan.riskLabel} · {scan.score}/100
+                <p className={`font-display text-base font-bold ${RISK_TEXT[scan.riskLevel]}`}>
+                  {scan.riskLabel}
                 </p>
                 <p className="text-xs text-ink-soft">{formatWhen(scan.savedAt)}</p>
               </div>
-              <p className="mt-2 text-sm text-ink-muted">
-                {scan.signalIds.length} warning sign
-                {scan.signalIds.length === 1 ? '' : 's'}
-                {scan.signalIds.length > 0
-                  ? `: ${scan.signalIds.slice(0, 4).join(', ')}${
-                      scan.signalIds.length > 4 ? '…' : ''
-                    }`
-                  : ''}
-              </p>
-              <p className="mt-1 text-xs text-ink-soft">
-                Original message length: {scan.messagePreviewLength} characters
-                (text not stored)
+              <p className="mt-1 text-sm text-ink-muted">
+                Categories:{' '}
+                {scan.categories.length > 0
+                  ? scan.categories.join(', ')
+                  : 'none'}
               </p>
             </li>
           ))}

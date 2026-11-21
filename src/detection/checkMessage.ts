@@ -1,3 +1,4 @@
+import { classifyPatterns } from './classify'
 import { normalizeMessage } from './normalize'
 import { DETECTION_RULES, evaluateRule } from './rules'
 import {
@@ -101,6 +102,7 @@ export function checkMessage(rawText: string): CheckResult {
       categories,
     },
     improveTip: improveTipFor(signals, categories, score),
+    patterns: classifyPatterns(signals),
   }
 }
 

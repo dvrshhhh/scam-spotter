@@ -17,10 +17,10 @@ export function AppHeader() {
             </span>
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-paper/90 sm:text-lg">
-            Check suspicious messages, inspect risky links, learn common scam
-            types, and review scans you choose to save. Analysis stays local in
-            your browser. Educational aid only, not proof a message is genuine
-            or a scam.
+            A local scam-safety toolkit: check messages, inspect links, follow a
+            calm safety guide, and practise with educational samples. Analysis
+            stays in your browser. This flags common warning signs and can make
+            mistakes. It cannot prove a message is safe or fraudulent.
           </p>
         </div>
       </div>

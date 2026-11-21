@@ -26,13 +26,14 @@ export function PrivacyNote({
           Text stays in this browser. There is no upload and no remote AI.
         </li>
         <li>
-          Contents are{' '}
-          <strong className="font-semibold text-ink">not stored</strong> unless
-          you choose to save a scan summary on this device.
+          Optional history is{' '}
+          <strong className="font-semibold text-ink">off by default</strong>.
+          When enabled, only date, risk level, and warning-sign categories can
+          be saved. The original message text is never stored.
         </li>
         <li>
-          The checker flags common warning signs and can be wrong. Low risk does
-          not mean a message is safe.
+          The checker flags common warning signs and can make mistakes. Low risk
+          does not mean a message is safe.
         </li>
       </ul>
 

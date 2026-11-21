@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import {
   analyzeUrlsInText,
   URL_REASON_LABELS,
@@ -6,38 +6,47 @@ import {
 } from '../detection/urlSignals'
 
 const SAMPLES = [
-  'https://bit.ly/track991',
-  'https://paypa1-secure-login.xyz/verify',
-  'https://www.wikipedia.org/wiki/Phishing',
+  'Click here to verify: https://bit.ly/track991',
+  'Confirm billing at http://paypa1-secure-login.xyz/verify',
+  'Read more at https://www.wikipedia.org/wiki/Phishing',
 ]
 
-export function LinkChecker() {
-  const [input, setInput] = useState('')
+interface LinkCheckerProps {
+  /** Optional text from the Check tab so users can inspect the same paste. */
+  seedText?: string
+}
+
+export function LinkChecker({ seedText = '' }: LinkCheckerProps) {
+  const [input, setInput] = useState(seedText)
   const [findings, setFindings] = useState<UrlFinding[] | null>(null)
   const [status, setStatus] = useState(
-    'Paste a link or a short message that contains a URL, then check it locally.',
+    'Paste a message or URL. Inspection stays in this browser and never visits the link.',
   )
   const inputId = useId()
-  const resultId = useId()
+
+  useEffect(() => {
+    if (!seedText.trim()) return
+    setInput((current) => (current.trim() ? current : seedText))
+  }, [seedText])
 
   function runCheck() {
     const trimmed = input.trim()
     if (!trimmed) {
       setFindings(null)
-      setStatus('Enter a URL or text that includes a link first.')
+      setStatus('Enter text that includes a URL first.')
       return
     }
     const next = analyzeUrlsInText(trimmed)
     setFindings(next)
     if (next.length === 0) {
-      setStatus('No URL detected in that text.')
+      setStatus('No URL found in that text.')
       return
     }
-    const risky = next.filter((f) => f.reasons.length > 0).length
+    const flagged = next.filter((item) => item.reasons.length > 0).length
     setStatus(
-      risky > 0
-        ? `Found ${next.length} link${next.length === 1 ? '' : 's'}; ${risky} look suspicious under local heuristics.`
-        : `Found ${next.length} link${next.length === 1 ? '' : 's'}; no high-risk heuristics matched. Still verify unexpected links.`,
+      flagged > 0
+        ? `Found ${next.length} URL${next.length === 1 ? '' : 's'}; ${flagged} show structural caution clues.`
+        : `Found ${next.length} URL${next.length === 1 ? '' : 's'}; no structural caution clues matched. That does not prove a link is safe.`,
     )
   }
 
@@ -48,24 +57,24 @@ export function LinkChecker() {
           id="link-check-heading"
           className="font-display text-2xl font-extrabold tracking-tight text-ink"
         >
-          Link safety helper
+          Link inspection
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted sm:text-base">
-          Inspect a URL with the same local heuristics used by the message
-          checker. Nothing is uploaded. This does not visit the page or prove a
-          site is safe.
+          Extract URLs and review structural clues such as shorteners, IP hosts,
+          lookalike spelling, deceptive structure, and plain HTTP. This tool
+          never opens or sends a URL, and it cannot check live reputation.
         </p>
 
         <label htmlFor={inputId} className="mt-6 block text-sm font-semibold text-ink">
-          URL or text containing a link
+          Message text or URL
         </label>
         <textarea
           id={inputId}
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          rows={4}
-          className="mt-2 w-full border border-line bg-white px-3 py-3 text-sm text-ink outline-none focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-focus"
-          placeholder="https://example.com/login or paste a short SMS with a link"
+          rows={5}
+          className="mt-2 w-full border border-line bg-white px-3 py-3 text-sm text-ink"
+          placeholder="Paste a message that contains a link, or a single URL"
         />
 
         <div className="mt-4 flex flex-wrap gap-3">
@@ -74,14 +83,14 @@ export function LinkChecker() {
             onClick={runCheck}
             className="min-h-11 border border-brand bg-brand px-4 text-sm font-semibold text-sheet transition hover:bg-brand-deep"
           >
-            Check link
+            Inspect links
           </button>
           <button
             type="button"
             onClick={() => {
               setInput('')
               setFindings(null)
-              setStatus('Cleared. Paste another link when ready.')
+              setStatus('Cleared. Paste another message or URL when ready.')
             }}
             className="min-h-11 border border-line bg-white px-4 text-sm font-semibold text-ink-muted transition hover:border-ink hover:text-ink"
           >
@@ -89,15 +98,15 @@ export function LinkChecker() {
           </button>
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2" aria-label="Sample links">
+        <div className="mt-4 flex flex-wrap gap-2" aria-label="Sample texts">
           {SAMPLES.map((sample) => (
             <button
               key={sample}
               type="button"
               onClick={() => setInput(sample)}
-              className="border border-line bg-paper px-2.5 py-1.5 text-xs font-medium text-ink-muted transition hover:border-ink hover:text-ink"
+              className="max-w-full border border-line bg-paper px-2.5 py-1.5 text-left text-xs font-medium text-ink-muted transition hover:border-ink hover:text-ink"
             >
-              {sample.replace(/^https?:\/\//, '')}
+              {sample.length > 64 ? `${sample.slice(0, 61)}...` : sample}
             </button>
           ))}
         </div>
@@ -107,41 +116,64 @@ export function LinkChecker() {
         {status}
       </p>
 
-      {findings && (
-        <div id={resultId} className="space-y-4">
+      {findings && findings.length === 0 && (
+        <div className="border border-dashed border-line bg-sheet/70 px-5 py-8">
+          <p className="font-display text-xl font-bold text-ink">No URL found</p>
+          <p className="mt-2 max-w-xl text-sm text-ink-soft">
+            Try pasting a full link starting with http:// or https://, or a short
+            message that includes one. Shortener hosts without a scheme (for
+            example bit.ly/...) are also detected.
+          </p>
+        </div>
+      )}
+
+      {findings && findings.length > 0 && (
+        <ul className="space-y-4">
           {findings.map((finding) => {
-            const risky = finding.reasons.length > 0
+            const flagged = finding.reasons.length > 0
             return (
-              <article
-                key={finding.url}
-                className={`sheet px-5 py-5 ${
-                  risky ? 'bg-risk-mid-bg/50' : 'bg-risk-low-bg/40'
-                }`}
-              >
-                <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft">
-                  {risky ? 'Caution signals found' : 'No high-risk heuristics'}
-                </p>
-                <p className="mt-2 break-all font-display text-base font-bold text-ink">
-                  {finding.url}
-                </p>
-                {risky ? (
-                  <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-ink-muted">
-                    {finding.reasons.map((reason) => (
-                      <li key={reason}>
-                        {URL_REASON_LABELS[reason] ?? reason}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="mt-3 text-sm text-ink-muted">
-                    Local checks did not flag this host. That is not a safety
-                    guarantee. Prefer official apps and typed addresses.
+              <li key={finding.url}>
+                <article
+                  className={`sheet px-5 py-5 ${
+                    flagged ? 'bg-risk-mid-bg/45' : 'bg-risk-low-bg/35'
+                  }`}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft">
+                    {flagged
+                      ? 'Structural caution clues'
+                      : 'No structural caution clues'}
+                    {flagged ? ' · hashed marker' : ' · solid calm marker'}
                   </p>
-                )}
-              </article>
+                  <p className="mt-2 text-sm font-semibold text-ink">
+                    Hostname:{' '}
+                    <span className="font-display">
+                      {finding.hostname ?? 'unknown'}
+                    </span>
+                  </p>
+                  <p className="mt-1 break-all text-sm text-ink-muted">{finding.url}</p>
+                  <p className="mt-2 text-xs text-ink-soft">
+                    Protocol: {finding.usesPlainHttp ? 'HTTP (not encrypted)' : 'HTTPS or unspecified short form'}
+                  </p>
+                  {flagged ? (
+                    <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-ink-muted">
+                      {finding.reasons.map((reason) => (
+                        <li key={reason}>
+                          {URL_REASON_LABELS[reason] ?? reason}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-3 text-sm text-ink-muted">
+                      Local structure checks did not flag this host. That is not
+                      proof the destination is safe. Prefer official apps and
+                      addresses you type yourself.
+                    </p>
+                  )}
+                </article>
+              </li>
             )
           })}
-        </div>
+        </ul>
       )}
     </section>
   )

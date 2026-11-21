@@ -65,6 +65,8 @@ const CLICK_PRESSURE =
 
 export interface UrlFinding {
   url: string
+  hostname: string | null
+  usesPlainHttp: boolean
   reasons: string[]
 }
 
@@ -109,17 +111,47 @@ function tldOf(host: string): string {
 
 /** Human labels for URL heuristic reason codes. */
 export const URL_REASON_LABELS: Record<string, string> = {
-  'unparseable-url': 'Could not parse this as a normal web address',
-  'url-shortener': 'Uses a URL shortener that hides the real destination',
-  'ip-literal-host': 'Points at a raw IP address instead of a normal domain',
-  'punycode-host': 'Uses punycode (xn--) which can hide lookalike characters',
-  'userinfo-at-sign': 'Contains an @ trick that can disguise the real host',
-  'risky-tld': 'Uses a top-level domain often seen in disposable phishing sites',
-  'brand-spoof-host': 'Host name looks like a brand spoof, not an official domain',
-  'sensitive-path': 'Path looks like login, KYC, OTP, or account verification',
-  'insecure-http-sensitive': 'Uses insecure HTTP on a sensitive login-style page',
-  'security-themed-host': 'Host name leans on “secure / login / bank” wording',
+  'unparseable-url':
+    'Could not parse this as a normal web address — odd formatting can hide where a link really goes.',
+  'url-shortener':
+    'Uses a URL shortener that hides the real destination until you open it. Prefer typing official sites yourself.',
+  'ip-literal-host':
+    'Points at a raw IP address instead of a normal domain. Phishing kits often skip a real brand domain.',
+  'punycode-host':
+    'Uses punycode (xn--) which can hide lookalike characters in the host name.',
+  'userinfo-at-sign':
+    'Contains an @ trick that can disguise the real host after a fake “friendly” prefix.',
+  'risky-tld':
+    'Uses a top-level domain often seen in disposable phishing sites. Treat unexpected asks on these hosts carefully.',
+  'brand-spoof-host':
+    'Host name looks like a brand spoof, not an official domain. Check the spelling against a site you open yourself.',
+  'sensitive-path':
+    'Path looks like login, KYC, OTP, or account verification — a common lure for credential theft.',
+  'insecure-http-sensitive':
+    'Uses insecure HTTP on a sensitive login-style page, so traffic is easier to intercept.',
+  'plain-http':
+    'Uses plain HTTP instead of HTTPS. That alone is not proof of harm, but it is weaker protection for any data you type.',
+  'security-themed-host':
+    'Host name leans on “secure / login / bank” wording to sound official without proving it is.',
+  'long-subdomain-chain':
+    'Unusually long subdomain chain that can hide the real registrable site farther to the right.',
+  'digit-lookalike':
+    'Host mixes letters and digits in a way often used for lookalike spelling (for example paypa1).',
 }
+
+/** Reasons used for message scoring (excludes soft inspection-only flags). */
+const SCORING_REASONS = new Set([
+  'unparseable-url',
+  'url-shortener',
+  'ip-literal-host',
+  'punycode-host',
+  'userinfo-at-sign',
+  'risky-tld',
+  'brand-spoof-host',
+  'sensitive-path',
+  'insecure-http-sensitive',
+  'security-themed-host',
+])
 
 export function analyzeOne(raw: string): UrlFinding {
   const url = stripTrailingPunctuation(raw)
@@ -127,10 +159,10 @@ export function analyzeOne(raw: string): UrlFinding {
   const host = hostFromUrl(url)
   const path = pathFromUrl(url)
   const lower = url.toLowerCase()
+  const usesPlainHttp = /^http:\/\//i.test(url)
 
   if (!host) {
-    reasons.push('unparseable-url')
-    return { url, reasons }
+    return { url, hostname: null, usesPlainHttp, reasons: ['unparseable-url'] }
   }
 
   if (SHORTENER_HOSTS.has(host) || [...SHORTENER_HOSTS].some((s) => host.endsWith(`.${s}`))) {
@@ -161,7 +193,7 @@ export function analyzeOne(raw: string): UrlFinding {
     reasons.push('sensitive-path')
   }
 
-  if (/^http:\/\//i.test(url) && (SENSITIVE_PATH.test(path) || BRAND_TOKENS.test(host))) {
+  if (usesPlainHttp && (SENSITIVE_PATH.test(path) || BRAND_TOKENS.test(host))) {
     reasons.push('insecure-http-sensitive')
   }
 
@@ -172,12 +204,35 @@ export function analyzeOne(raw: string): UrlFinding {
     reasons.push('security-themed-host')
   }
 
-  return { url, reasons }
+  return { url, hostname: host, usesPlainHttp, reasons }
 }
 
-/** Analyze every URL found in free text (local heuristics only). */
+/**
+ * Richer local inspection for the Link inspection tab.
+ * Adds soft structural clues such as plain HTTP (does not visit the URL).
+ */
+export function analyzeForInspection(raw: string): UrlFinding {
+  const base = analyzeOne(raw)
+  const reasons = [...base.reasons]
+
+  if (base.usesPlainHttp && !reasons.includes('insecure-http-sensitive')) {
+    reasons.push('plain-http')
+  }
+
+  if (base.hostname && base.hostname.split('.').filter(Boolean).length >= 4) {
+    reasons.push('long-subdomain-chain')
+  }
+
+  if (base.hostname && /[a-z]+\d+[a-z]+|\d+[a-z]+\d+/i.test(base.hostname)) {
+    reasons.push('digit-lookalike')
+  }
+
+  return { ...base, reasons }
+}
+
+/** Analyze every URL found in free text for the Link inspection UI. */
 export function analyzeUrlsInText(text: string): UrlFinding[] {
-  return collectUrls(text).map((url) => analyzeOne(url))
+  return collectUrls(text).map((url) => analyzeForInspection(url))
 }
 
 function looksLikeBrandSpoof(host: string): boolean {
@@ -206,12 +261,15 @@ export function collectUrls(text: string): string[] {
 export function findStrictSuspiciousUrl(text: string): string | null {
   const urls = collectUrls(text)
   let best: UrlFinding | null = null
+  let bestScore = 0
 
   for (const url of urls) {
     const finding = analyzeOne(url)
-    if (finding.reasons.length === 0) continue
-    if (!best || finding.reasons.length > best.reasons.length) {
+    const score = finding.reasons.filter((r) => SCORING_REASONS.has(r)).length
+    if (score === 0) continue
+    if (!best || score > bestScore) {
       best = finding
+      bestScore = score
     }
   }
 

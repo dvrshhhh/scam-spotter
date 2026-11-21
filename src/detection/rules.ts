@@ -210,6 +210,10 @@ export const DETECTION_RULES: DetectionRule[] = [
       /\benable\s+macros?\b/i,
       /\bscan\s+(?:the\s+)?qr\s*code\b/i,
       /\ballow\s+(?:screen\s+)?sharing\b/i,
+      /\bwork\s+from\s+home\b/i,
+      /\b(?:part[-\s]?time|online)\s+job\b/i,
+      /\bregistration\s+fee\b/i,
+      /\btraining\s+fee\b/i,
     ],
   },
   {
