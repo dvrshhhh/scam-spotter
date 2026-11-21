@@ -47,14 +47,14 @@ export function LinkChecker({ seedText = '' }: LinkCheckerProps) {
 
   return (
     <section className="animate-rise space-y-6" aria-labelledby="link-check-heading">
-      <div className="sheet px-5 py-6 sm:px-6">
+      <div className="sheet px-5 py-6 sm:px-7 sm:py-8">
         <h2
           id="link-check-heading"
           className="font-display text-2xl font-extrabold tracking-tight text-ink"
         >
           Link inspection
         </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted sm:text-base">
           Review structural clues such as shorteners, IP hosts, lookalike
           spelling, and plain HTTP. Never opens a link or checks live reputation.
         </p>
@@ -78,7 +78,7 @@ export function LinkChecker({ seedText = '' }: LinkCheckerProps) {
           <button
             type="button"
             onClick={runCheck}
-            className="min-h-11 border border-brand bg-brand px-4 text-sm font-semibold text-sheet transition hover:bg-brand-deep"
+            className="min-h-11 bg-signal px-4 text-sm font-semibold text-brand-deep transition hover:brightness-95"
           >
             Inspect links
           </button>

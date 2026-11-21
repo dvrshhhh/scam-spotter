@@ -150,10 +150,10 @@ export default function App() {
       <AppHeader />
       <AppNav active={tab} onChange={setTab} />
 
-      <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
+      <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         {tab === 'check' && (
           <>
-            <main className="sheet px-5 py-6 sm:px-6">
+            <main className="sheet px-5 py-6 sm:px-7 sm:py-8">
               <MessageInput
                 value={message}
                 onChange={(value) => {
@@ -163,13 +163,15 @@ export default function App() {
                 onCheck={handleCheck}
                 onClear={handleClear}
               />
-              <div className="mt-6 border-t border-line pt-5">
+              <div className="mt-8 border-t border-line pt-6">
                 <ExampleButtons onLoad={handleLoadExample} activeId={activeExample} />
               </div>
             </main>
 
-            <div className="mt-5 space-y-4">
-              <PrivacyNote />
+            <div className="mt-6 space-y-4">
+              <div className="border-l-4 border-signal bg-white px-4 py-4 sm:px-5">
+                <PrivacyNote />
+              </div>
               <ScanHistory
                 enabled={historyEnabled}
                 scans={savedScans}
@@ -185,7 +187,7 @@ export default function App() {
             <div
               ref={resultRef}
               tabIndex={-1}
-              className="mt-8 outline-none"
+              className="mt-10 outline-none"
               aria-labelledby={result ? 'result-heading' : undefined}
             >
               {result ? (
@@ -194,9 +196,19 @@ export default function App() {
                   onInspectLinks={() => setTab('links')}
                 />
               ) : (
-                <p className="text-sm text-ink-soft">
-                  Results appear here after you check a message.
-                </p>
+                <section
+                  className="border border-dashed border-line bg-sheet/70 px-5 py-8 sm:px-7"
+                  aria-label="Results placeholder"
+                >
+                  <p className="font-display text-xl font-bold text-ink">
+                    Results appear after you check a message
+                  </p>
+                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">
+                    You will see a risk level, matched warning signs, likely
+                    patterns, and safer next steps. This cannot prove a message
+                    is safe or fraudulent.
+                  </p>
+                </section>
               )}
             </div>
           </>
@@ -205,11 +217,11 @@ export default function App() {
         {tab === 'links' && <LinkChecker seedText={message} />}
         {tab === 'safety' && <SafetyGuide />}
 
-        <footer className="mt-10 border-t border-line pt-4 text-sm text-ink-soft">
+        <footer className="mt-12 border-t border-line pt-5 text-sm text-ink-muted">
           <p>
-            Educational toolkit for a BTech project. Flags common warning signs
-            only — not a guarantee of safety, and not a substitute for official
-            fraud guidance.
+            Educational toolkit for a BTech Engineering Innovation Project.
+            Flags common warning signs only — not a guarantee of safety, and not
+            a substitute for official fraud guidance.
           </p>
         </footer>
       </div>

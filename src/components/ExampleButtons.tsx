@@ -7,8 +7,8 @@ interface ExampleButtonsProps {
 
 export function ExampleButtons({ onLoad, activeId }: ExampleButtonsProps) {
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-      <label htmlFor="example-select" className="text-sm font-medium text-ink-muted">
+    <div className="flex flex-col gap-2">
+      <label htmlFor="example-select" className="text-sm font-semibold text-ink">
         Try an example
       </label>
       <select
@@ -19,7 +19,7 @@ export function ExampleButtons({ onLoad, activeId }: ExampleButtonsProps) {
           if (!value) return
           onLoad(value)
         }}
-        className="min-h-11 w-full max-w-md border border-line bg-white px-3 text-sm text-ink"
+        className="min-h-11 w-full border border-line bg-white px-3 text-sm text-ink sm:max-w-md"
       >
         <option value="">Choose a sample message…</option>
         {EXAMPLE_MESSAGES.map((example) => (

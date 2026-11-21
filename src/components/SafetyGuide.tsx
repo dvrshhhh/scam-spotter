@@ -7,14 +7,14 @@ export function SafetyGuide() {
 
   return (
     <section className="animate-rise space-y-6" aria-labelledby="safety-heading">
-      <div className="sheet px-5 py-6 sm:px-6">
+      <div className="sheet px-5 py-6 sm:px-7 sm:py-8">
         <h2
           id="safety-heading"
           className="font-display text-2xl font-extrabold tracking-tight text-ink"
         >
           Safety guide
         </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted sm:text-base">
           Calm next steps. Contact organizations through official apps or sites
           you already trust. No emergency numbers are listed — those vary by country.
         </p>
@@ -36,7 +36,7 @@ export function SafetyGuide() {
         </select>
       </div>
 
-      <article className="sheet px-5 py-6 sm:px-6" aria-labelledby="safety-path-title">
+      <article className="sheet px-5 py-6 sm:px-7" aria-labelledby="safety-path-title">
         <h3 id="safety-path-title" className="font-display text-xl font-bold text-ink">
           {active.title}
         </h3>

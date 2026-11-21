@@ -13,9 +13,12 @@ const TABS: { id: AppTab; label: string }[] = [
 
 export function AppNav({ active, onChange }: AppNavProps) {
   return (
-    <nav className="border-b border-line bg-sheet" aria-label="App sections">
+    <nav
+      className="sticky top-0 z-20 border-b border-line bg-sheet/95 backdrop-blur-sm"
+      aria-label="App sections"
+    >
       <div
-        className="mx-auto flex w-full max-w-3xl gap-1 px-4 sm:px-6"
+        className="mx-auto flex w-full max-w-5xl gap-1 px-4 sm:px-6 lg:px-8"
         role="tablist"
         aria-label="Toolkit sections"
       >
@@ -28,10 +31,10 @@ export function AppNav({ active, onChange }: AppNavProps) {
               role="tab"
               aria-selected={isActive}
               onClick={() => onChange(tab.id)}
-              className={`min-h-11 flex-1 px-2 text-sm font-semibold transition ${
+              className={`min-h-12 px-4 text-sm font-semibold transition sm:px-5 ${
                 isActive
                   ? 'border-b-2 border-signal text-ink'
-                  : 'border-b-2 border-transparent text-ink-soft hover:text-ink'
+                  : 'border-b-2 border-transparent text-ink-muted hover:text-ink'
               }`}
             >
               {tab.label}
