@@ -294,3 +294,8 @@ export function hasClickPressure(text: string): boolean {
 export function countUrls(text: string): number {
   return collectUrls(text).length
 }
+
+/** True when plain HTTP is used (inspection and scoring helpers). */
+export function usesPlainHttp(url: string): boolean {
+  return /^http:\/\//i.test(url.trim())
+}

@@ -62,13 +62,15 @@ Rule-based TypeScript under `src/detection/`:
 
 | File | Role |
 | --- | --- |
-| `normalize.ts` | Local text cleanup before matching |
-| `rules.ts` | Warning-sign patterns |
-| `score.ts` | Weighted sum, diversity + combo bonuses, thresholds |
-| `urlSignals.ts` | Local URL structure heuristics |
+| `normalize.ts` | Local text cleanup (lookalikes, spacing/underscore tricks, light leetspeak) |
+| `rules.ts` | Warning-sign patterns, including job-offer pressure |
+| `score.ts` | Weighted sum, diversity + dangerous combo bonuses, thresholds |
+| `urlSignals.ts` | Local URL structure heuristics (never fetches) |
 | `classify.ts` | Likely pattern labels from detected clues |
-| `checkMessage.ts` | Runs the full check and builds the explainable result |
+| `checkMessage.ts` | Runs the full check, extracts hostnames, builds the explainable result |
 | `types.ts` | Shared types |
+
+There is **no network backend**. “Detection backend” means this in-browser rule engine.
 
 ### Scoring approach
 

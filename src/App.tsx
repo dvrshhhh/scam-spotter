@@ -203,7 +203,10 @@ export default function App() {
               aria-labelledby={result ? 'result-heading' : undefined}
             >
               {result ? (
-                <RiskResult result={result} />
+                <RiskResult
+                  result={result}
+                  onInspectLinks={() => setTab('links')}
+                />
               ) : (
                 <section
                   className="border border-dashed border-line bg-sheet/70 px-5 py-8 sm:px-7"

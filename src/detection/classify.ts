@@ -9,6 +9,9 @@ export function classifyPatterns(signals: DetectedSignal[]): ScamPattern[] {
 
   const categories = new Set(signals.map((s) => s.category))
   const ruleIds = new Set(signals.map((s) => s.ruleId))
+  const blob = signals
+    .map((s) => `${s.matchedText} ${s.title} ${s.ruleId}`)
+    .join(' ')
   const patterns: ScamPattern[] = []
 
   if (categories.has('impersonation')) {
@@ -38,11 +41,11 @@ export function classifyPatterns(signals: DetectedSignal[]): ScamPattern[] {
     })
   }
 
-  const jobLike = signals.some((s) =>
-    /work from home|part[-\s]?time job|online job|registration fee|training fee|anydesk|teamviewer|remote access|install/i.test(
-      `${s.matchedText} ${s.title} ${s.ruleId}`,
-    ),
-  )
+  const jobLike =
+    ruleIds.has('job-offer-pressure') ||
+    /work from home|part[-\s]?time job|online job|registration fee|training fee|anydesk|teamviewer|remote access|data entry job/i.test(
+      blob,
+    )
   if (
     jobLike ||
     (ruleIds.has('software-attachments') &&

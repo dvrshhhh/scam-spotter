@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useId, useState } from 'react'
 import {
   analyzeUrlsInText,
   URL_REASON_LABELS,
@@ -18,23 +18,24 @@ interface LinkCheckerProps {
 
 export function LinkChecker({ seedText = '' }: LinkCheckerProps) {
   const [input, setInput] = useState(seedText)
+  const [touched, setTouched] = useState(false)
   const [findings, setFindings] = useState<UrlFinding[] | null>(null)
   const [status, setStatus] = useState(
     'Paste a message or URL. Inspection stays in this browser and never visits the link.',
   )
   const inputId = useId()
-
-  useEffect(() => {
-    if (!seedText.trim()) return
-    setInput((current) => (current.trim() ? current : seedText))
-  }, [seedText])
+  const displayValue = touched || input.trim() ? input : seedText
 
   function runCheck() {
-    const trimmed = input.trim()
+    const trimmed = displayValue.trim()
     if (!trimmed) {
       setFindings(null)
       setStatus('Enter text that includes a URL first.')
       return
+    }
+    if (!touched) {
+      setTouched(true)
+      setInput(trimmed)
     }
     const next = analyzeUrlsInText(trimmed)
     setFindings(next)
@@ -70,8 +71,11 @@ export function LinkChecker({ seedText = '' }: LinkCheckerProps) {
         </label>
         <textarea
           id={inputId}
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
+          value={displayValue}
+          onChange={(event) => {
+            setTouched(true)
+            setInput(event.target.value)
+          }}
           rows={5}
           className="mt-2 w-full border border-line bg-white px-3 py-3 text-sm text-ink"
           placeholder="Paste a message that contains a link, or a single URL"
@@ -88,6 +92,7 @@ export function LinkChecker({ seedText = '' }: LinkCheckerProps) {
           <button
             type="button"
             onClick={() => {
+              setTouched(true)
               setInput('')
               setFindings(null)
               setStatus('Cleared. Paste another message or URL when ready.')
@@ -103,7 +108,10 @@ export function LinkChecker({ seedText = '' }: LinkCheckerProps) {
             <button
               key={sample}
               type="button"
-              onClick={() => setInput(sample)}
+              onClick={() => {
+                setTouched(true)
+                setInput(sample)
+              }}
               className="max-w-full border border-line bg-paper px-2.5 py-1.5 text-left text-xs font-medium text-ink-muted transition hover:border-ink hover:text-ink"
             >
               {sample.length > 64 ? `${sample.slice(0, 61)}...` : sample}

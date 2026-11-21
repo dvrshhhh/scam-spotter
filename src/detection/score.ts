@@ -76,6 +76,30 @@ const COMBO_RULES: ComboRule[] = [
     points: 6,
     requires: ['credentials', 'links'],
   },
+  {
+    id: 'money-urgency',
+    label: 'Money ask plus urgency',
+    points: 8,
+    requires: ['money', 'urgency'],
+  },
+  {
+    id: 'prize-links',
+    label: 'Prize or refund bait plus link',
+    points: 6,
+    requires: ['prize', 'links'],
+  },
+  {
+    id: 'software-secrecy',
+    label: 'Install or remote-access ask plus secrecy',
+    points: 8,
+    requires: ['software', 'secrecy'],
+  },
+  {
+    id: 'impersonation-money',
+    label: 'Impersonation plus money ask',
+    points: 6,
+    requires: ['impersonation', 'money'],
+  },
 ]
 
 export function computeRawScore(signals: DetectedSignal[]): {

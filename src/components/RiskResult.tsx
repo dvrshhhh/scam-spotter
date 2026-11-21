@@ -8,6 +8,7 @@ import { WarningList } from './WarningList'
 
 interface RiskResultProps {
   result: CheckResult
+  onInspectLinks?: () => void
 }
 
 const LEVEL_STYLES = {
@@ -34,7 +35,7 @@ const LEVEL_STYLES = {
   },
 } as const
 
-export function RiskResult({ result }: RiskResultProps) {
+export function RiskResult({ result, onInspectLinks }: RiskResultProps) {
   const [showScoring, setShowScoring] = useState(false)
   const detailsId = useId()
   const style = LEVEL_STYLES[result.riskLevel]
@@ -92,6 +93,36 @@ export function RiskResult({ result }: RiskResultProps) {
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {result.extractedHosts.length > 0 && (
+        <div className="sheet px-5 py-5 sm:px-6">
+          <h3 className="font-display text-lg font-bold text-ink">
+            Hostnames found in this message
+          </h3>
+          <p className="mt-1 text-sm text-ink-soft">
+            Extracted locally only. This app never opens or fetches these links.
+          </p>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {result.extractedHosts.map((host) => (
+              <li
+                key={host}
+                className="border border-line bg-white px-2.5 py-1 font-mono text-xs text-ink"
+              >
+                {host}
+              </li>
+            ))}
+          </ul>
+          {onInspectLinks && (
+            <button
+              type="button"
+              onClick={onInspectLinks}
+              className="mt-4 min-h-10 border border-brand bg-brand px-3 text-sm font-semibold text-sheet transition hover:bg-brand-deep"
+            >
+              Open Link inspection
+            </button>
+          )}
         </div>
       )}
 

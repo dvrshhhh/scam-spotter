@@ -90,4 +90,9 @@ export interface CheckResult {
   improveTip: string
   /** Likely patterns suggested by the detected clues. */
   patterns: ScamPattern[]
+  /**
+   * Hostnames extracted locally from the message for the Link inspection handoff.
+   * Empty when no URL-like tokens were found. Never fetched remotely.
+   */
+  extractedHosts: string[]
 }

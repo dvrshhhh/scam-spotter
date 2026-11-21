@@ -56,6 +56,9 @@ export const DETECTION_RULES: DetectionRule[] = [
       /\blimited\s+time\b/i,
       /\baction\s+required\b/i,
       /\bfailure\s+to\s+(?:respond|verify|update)\b/i,
+      /\bimmediate\s+attention\s+required\b/i,
+      /\byour\s+account\s+is\s+(?:at\s+risk|compromised)\b/i,
+      /\bunusual\s+(?:login|activity|transaction)\s+detected\b/i,
     ],
   },
   {
@@ -76,6 +79,8 @@ export const DETECTION_RULES: DetectionRule[] = [
       /\benter\s+(?:your\s+)?(?:password|pin|otp|cvv)\b/i,
       /\bprovide\s+(?:your\s+)?(?:password|otp|credentials)\b/i,
       /\b2fa\s+code\b|\btwo[-\s]factor\s+code\b/i,
+      /\bnet\s*banking\s+(?:password|pin|otp)\b/i,
+      /\bupi\s+pin\b/i,
     ],
   },
   {
@@ -120,6 +125,9 @@ export const DETECTION_RULES: DetectionRule[] = [
       /\baccount\s+number\b/i,
       /\bifsc\b/i,
       /\bimmediately\s+transfer\b/i,
+      /\bsend\s+(?:me\s+)?(?:rs\.?|inr|₹)\s*\d+/i,
+      /\bemergency\s+(?:funds?|money|cash)\b/i,
+      /\bi\s+need\s+(?:you\s+to\s+)?(?:pay|transfer|send)\b/i,
     ],
   },
   {
@@ -140,6 +148,8 @@ export const DETECTION_RULES: DetectionRule[] = [
       /\bselected\s+(?:as\s+)?(?:a\s+)?(?:winner|lucky)\b/i,
       /\bcashback\s+(?:credited|pending|waiting)\b/i,
       /\byou\s+are\s+(?:eligible|selected)\s+for\b/i,
+      /\blucky\s+winner\b/i,
+      /\bspin\s+(?:and\s+)?win\b/i,
     ],
   },
   {
@@ -210,10 +220,24 @@ export const DETECTION_RULES: DetectionRule[] = [
       /\benable\s+macros?\b/i,
       /\bscan\s+(?:the\s+)?qr\s*code\b/i,
       /\ballow\s+(?:screen\s+)?sharing\b/i,
+    ],
+  },
+  {
+    id: 'job-offer-pressure',
+    category: 'software',
+    title: 'Suspicious job or hire-to-pay pressure',
+    explanation:
+      'Fake hiring pitches often ask for registration fees, “training” payments, or remote-access apps before any real work starts.',
+    weight: 18,
+    patterns: [
       /\bwork\s+from\s+home\b/i,
       /\b(?:part[-\s]?time|online)\s+job\b/i,
       /\bregistration\s+fee\b/i,
       /\btraining\s+fee\b/i,
+      /\bhiring\s+(?:bonus|fee)\b/i,
+      /\bearn\s+(?:daily|weekly|from\s+home)\b/i,
+      /\bno\s+experience\s+(?:needed|required).{0,40}\b(?:fee|pay|deposit)\b/i,
+      /\bdata\s+entry\s+job\b/i,
     ],
   },
   {
@@ -225,7 +249,7 @@ export const DETECTION_RULES: DetectionRule[] = [
     weight: 15,
     patterns: [
       /\b(?:this\s+is|we\s+are|calling\s+from)\s+(?:your\s+)?(?:bank|support|security\s+team)\b/i,
-      /\b(?:microsoft|apple|google|amazon|paypal|irs|income\s+tax|customs|fedex|dhl|ups|sbi|hdfc|icici|axis\s+bank|paytm|phonepe|flipkart)\s+(?:support|security|team|alert|customer\s+care)\b/i,
+      /\b(?:microsoft|apple|google|amazon|paypal|irs|income\s+tax|customs|fedex|dhl|ups|sbi|hdfc|icici|axis\s+bank|paytm|phonepe|flipkart|whatsapp)\s+(?:support|security|team|alert|customer\s+care)\b/i,
       /\bit\s+support\b|\btech\s+support\b|\bcustomer\s+care\b/i,
       /\byour\s+(?:bank|account)\s+(?:security|fraud)\s+(?:department|team)\b/i,
       /\b(?:bank|account)\s+security\s+team\b/i,
@@ -234,6 +258,9 @@ export const DETECTION_RULES: DetectionRule[] = [
       /\bfrom\s+(?:the\s+)?(?:fraud|security)\s+(?:prevention\s+)?(?:team|department)\b/i,
       /\bcourier\s+(?:partner|service|delivery)\b/i,
       /\bcustoms\s+(?:duty|clearance|department)\b/i,
+      /\bdear\s+customer\b/i,
+      /\bdelivery\s+(?:failed|attempt|exception)\b/i,
+      /\bpackage\s+(?:held|detained|pending)\b/i,
     ],
   },
   {

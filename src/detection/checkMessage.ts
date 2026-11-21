@@ -14,10 +14,12 @@ import {
   REVIEW_MAX,
 } from './score'
 import type { CheckResult, DetectedSignal } from './types'
+import { analyzeUrlsInText } from './urlSignals'
 
 /**
  * Run the full local, rule-based check.
  * Message text never leaves the browser in this function.
+ * Nothing is logged.
  */
 export function checkMessage(rawText: string): CheckResult {
   const { original, normalized } = normalizeMessage(rawText)
@@ -46,6 +48,13 @@ export function checkMessage(rawText: string): CheckResult {
     computeRawScore(signals)
   const score = finalizeScore(raw, diversityBonus, comboBonus)
   const riskLevel = riskFromScore(score)
+  const extractedHosts = [
+    ...new Set(
+      analyzeUrlsInText(original || normalized)
+        .map((finding) => finding.hostname)
+        .filter((host): host is string => Boolean(host)),
+    ),
+  ]
 
   const scoringNotes: string[] = [
     `Detected ${signals.length} warning sign${signals.length === 1 ? '' : 's'} across ${categories.length} categor${categories.length === 1 ? 'y' : 'ies'}.`,
@@ -76,6 +85,12 @@ export function checkMessage(rawText: string): CheckResult {
     scoringNotes.push('No dangerous combo bonus.')
   }
 
+  if (extractedHosts.length > 0) {
+    scoringNotes.push(
+      `Extracted ${extractedHosts.length} hostname${extractedHosts.length === 1 ? '' : 's'} locally for link inspection (never fetched).`,
+    )
+  }
+
   scoringNotes.push(
     `Final score: ${score}/100 -> ${riskLabel(riskLevel)} (bands: 0 to ${LOW_MAX} low, ${LOW_MAX + 1} to ${REVIEW_MAX} review, ${REVIEW_MAX + 1} to 100 high).`,
   )
@@ -103,6 +118,7 @@ export function checkMessage(rawText: string): CheckResult {
     },
     improveTip: improveTipFor(signals, categories, score),
     patterns: classifyPatterns(signals),
+    extractedHosts,
   }
 }
 
