@@ -11,8 +11,11 @@ export interface SavedScanMeta {
 interface ScanHistoryProps {
   enabled: boolean
   scans: SavedScanMeta[]
+  canSave: boolean
+  saveStatus: string | null
   onEnable: () => void
   onDisable: () => void
+  onSave: () => void
   onClear: () => void
 }
 
@@ -36,83 +39,96 @@ function formatWhen(iso: string): string {
 export function ScanHistory({
   enabled,
   scans,
+  canSave,
+  saveStatus,
   onEnable,
   onDisable,
+  onSave,
   onClear,
 }: ScanHistoryProps) {
   return (
-    <section
-      className="sheet px-5 py-5 sm:px-6"
-      aria-labelledby="history-heading"
-    >
-      <h2 id="history-heading" className="font-display text-lg font-bold text-ink">
-        Optional scan history
-      </h2>
-      <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-        History is <strong className="text-ink">off by default</strong>. When
-        you enable it, this browser stores only the date, risk level, and
-        warning-sign categories. The original message text is never saved.
-      </p>
+    <details className="border border-line bg-sheet/80 px-4 py-3">
+      <summary className="cursor-pointer font-display text-sm font-bold text-ink">
+        Optional local history
+        <span className="ml-2 font-sans text-xs font-normal text-ink-soft">
+          {enabled ? 'on' : 'off'}
+        </span>
+      </summary>
 
-      <div className="mt-4 flex flex-wrap gap-3">
-        {!enabled ? (
-          <button
-            type="button"
-            onClick={onEnable}
-            className="min-h-10 border border-brand bg-brand px-3 text-sm font-semibold text-sheet transition hover:bg-brand-deep"
-          >
-            Enable local history
-          </button>
-        ) : (
-          <>
+      <div className="mt-3 space-y-3 border-t border-line pt-3">
+        <p className="text-sm text-ink-muted">
+          Stored only on this device. Never stores the pasted message text.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          {!enabled ? (
             <button
               type="button"
-              onClick={onDisable}
-              className="min-h-10 border border-line bg-white px-3 text-sm font-semibold text-ink-muted transition hover:border-ink hover:text-ink"
+              onClick={onEnable}
+              className="font-semibold text-brand underline-offset-4 hover:underline"
             >
-              Disable history
+              Turn on
             </button>
-            <button
-              type="button"
-              onClick={onClear}
-              disabled={scans.length === 0}
-              className="min-h-10 border border-line bg-white px-3 text-sm font-semibold text-ink-muted transition hover:border-ink hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Clear history
-            </button>
-          </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={onSave}
+                disabled={!canSave}
+                className="font-semibold text-brand underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:text-ink-soft disabled:no-underline"
+              >
+                Save this result
+              </button>
+              <button
+                type="button"
+                onClick={onClear}
+                disabled={scans.length === 0}
+                className="text-ink-muted underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:no-underline"
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                onClick={onDisable}
+                className="text-ink-muted underline-offset-4 hover:underline"
+              >
+                Turn off
+              </button>
+            </>
+          )}
+        </div>
+
+        {saveStatus && (
+          <p className="text-sm text-ink-muted" role="status">
+            {saveStatus}
+          </p>
+        )}
+
+        {enabled && scans.length === 0 && (
+          <p className="text-sm text-ink-soft">No saved summaries yet.</p>
+        )}
+
+        {enabled && scans.length > 0 && (
+          <ul className="space-y-2">
+            {scans.map((scan) => (
+              <li
+                key={`${scan.savedAt}-${scan.riskLabel}`}
+                className="border-l-2 border-line pl-3 text-sm"
+              >
+                <span className={`font-semibold ${RISK_TEXT[scan.riskLevel]}`}>
+                  {scan.riskLabel}
+                </span>
+                <span className="text-ink-soft"> · {formatWhen(scan.savedAt)}</span>
+                <p className="text-ink-muted">
+                  {scan.categories.length > 0
+                    ? scan.categories.join(', ')
+                    : 'no categories'}
+                </p>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
-
-      {enabled && scans.length === 0 && (
-        <p className="mt-4 text-sm text-ink-soft">
-          No saved summaries yet. After a check, use “Save this scan locally”.
-        </p>
-      )}
-
-      {enabled && scans.length > 0 && (
-        <ul className="mt-4 space-y-3">
-          {scans.map((scan) => (
-            <li
-              key={`${scan.savedAt}-${scan.riskLabel}`}
-              className="border border-line bg-white px-4 py-3"
-            >
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <p className={`font-display text-base font-bold ${RISK_TEXT[scan.riskLevel]}`}>
-                  {scan.riskLabel}
-                </p>
-                <p className="text-xs text-ink-soft">{formatWhen(scan.savedAt)}</p>
-              </div>
-              <p className="mt-1 text-sm text-ink-muted">
-                Categories:{' '}
-                {scan.categories.length > 0
-                  ? scan.categories.join(', ')
-                  : 'none'}
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+    </details>
   )
 }

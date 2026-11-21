@@ -35,12 +35,12 @@ VITE_BASE=/scam-spotter/ npm run build
 
 ## Features
 
-Navigation sections:
+Simple top nav: **Check · Links · Guide · Learn**.
 
-1. **Check** — paste a message (or load examples), run the weighted local risk score, see **Low risk**, **Review carefully**, or **High risk**, matched warning signs, likely pattern labels, score explainability, and safer next steps. Includes character count, clear, examples, and privacy controls.
-2. **Link inspection** — extract URLs from pasted text, show each hostname, and flag structural clues (shorteners, IP hosts, lookalike spelling, deceptive structure, plain HTTP). Never visits or fetches a URL. Cannot check live reputation.
-3. **Safety guide** — short, calm paths for: received a suspicious message; clicked a link; shared a password, PIN, or OTP; sent money or payment details. Recommends official apps/websites and contacting your bank or provider directly. No invented phone numbers.
-4. **Learn** — educational sample messages across scam patterns. Choose suspicious or ordinary, reveal clues and reasoning, see a quiz score, and try again. All samples are clearly labeled as educational examples.
+1. **Check** — paste a message (or pick one example from a dropdown), run the local risk score (**Low risk / Review carefully / High risk**), see warning signs, likely patterns, hostnames, and next steps. Score details stay collapsed until you open them.
+2. **Links** — inspect URLs from pasted text for structural clues only. Never visits links.
+3. **Guide** — pick a situation from a dropdown and follow calm next steps. No invented phone numbers.
+4. **Learn** — educational quiz samples with reveal, score, and try again.
 
 ### Optional scan history
 

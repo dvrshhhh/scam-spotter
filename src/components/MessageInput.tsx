@@ -22,7 +22,7 @@ export function MessageInput({
           htmlFor="message-input"
           className="font-display text-xl font-bold tracking-tight text-ink"
         >
-          Paste a message to check
+          Paste a message
         </label>
         <span className="text-sm text-ink-soft" aria-live="polite">
           {charCount.toLocaleString()} characters
@@ -32,37 +32,35 @@ export function MessageInput({
       <textarea
         id="message-input"
         name="message"
-        rows={9}
+        rows={8}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="Paste an SMS, email body, or chat message here..."
+        placeholder="Paste an SMS, email, or chat message…"
         className="w-full resize-y border border-line bg-white px-4 py-3 text-base leading-relaxed text-ink placeholder:text-ink-soft/80"
         spellCheck
         autoComplete="off"
         disabled={disabled}
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-ink-soft">
-          Checking runs in your browser. Nothing is uploaded.
-        </p>
-        <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          onClick={onCheck}
+          disabled={disabled || value.trim().length === 0}
+          className="inline-flex min-h-11 items-center justify-center bg-brand px-5 text-sm font-semibold text-sheet transition hover:bg-brand-deep disabled:cursor-not-allowed disabled:bg-ink-soft"
+        >
+          Check message
+        </button>
+        {value.length > 0 && (
           <button
             type="button"
             onClick={onClear}
-            className="inline-flex min-h-11 items-center justify-center border border-line bg-white px-4 text-sm font-semibold text-ink-muted transition hover:border-ink hover:text-ink"
+            className="text-sm font-medium text-ink-soft underline-offset-4 hover:text-ink hover:underline"
           >
             Clear
           </button>
-          <button
-            type="button"
-            onClick={onCheck}
-            disabled={disabled || value.trim().length === 0}
-            className="inline-flex min-h-11 items-center justify-center bg-brand px-5 text-sm font-semibold text-sheet transition hover:bg-brand-deep disabled:cursor-not-allowed disabled:bg-ink-soft"
-          >
-            Check message
-          </button>
-        </div>
+        )}
+        <p className="text-sm text-ink-soft">Stays in your browser. Nothing is uploaded.</p>
       </div>
     </div>
   )

@@ -7,66 +7,37 @@ export function SafetyGuide() {
 
   return (
     <section className="animate-rise space-y-6" aria-labelledby="safety-heading">
-      <div className="sheet px-5 py-6 sm:px-7 sm:py-7">
+      <div className="sheet px-5 py-6 sm:px-6">
         <h2
           id="safety-heading"
           className="font-display text-2xl font-extrabold tracking-tight text-ink"
         >
           Safety guide
         </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted sm:text-base">
-          Calm next steps for common situations. Contact organizations through
-          official apps, websites, or numbers you already trust. This guide does
-          not list emergency numbers because those vary by country.
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">
+          Calm next steps. Contact organizations through official apps or sites
+          you already trust. No emergency numbers are listed — those vary by country.
         </p>
-      </div>
 
-      <div
-        className="flex flex-col gap-0 border border-line sm:flex-row"
-        role="tablist"
-        aria-label="Safety situations"
-      >
-        {SAFETY_PATHS.map((path, index) => {
-          const selected = path.id === active.id
-          return (
-            <button
-              key={path.id}
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              onClick={() => setActiveId(path.id)}
-              className={`flex-1 px-4 py-3 text-left transition ${
-                index > 0 ? 'border-t border-line sm:border-t-0 sm:border-l' : ''
-              } ${
-                selected
-                  ? 'bg-brand text-sheet'
-                  : 'bg-white text-ink hover:bg-paper'
-              }`}
-            >
-              <span className="block font-display text-sm font-bold">
-                {path.title}
-              </span>
-              <span
-                className={`mt-1 block text-xs leading-snug ${
-                  selected ? 'text-paper/85' : 'text-ink-soft'
-                }`}
-              >
-                {path.summary}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-
-      <article
-        className="sheet px-5 py-6 sm:px-7"
-        role="tabpanel"
-        aria-labelledby="safety-path-title"
-      >
-        <h3
-          id="safety-path-title"
-          className="font-display text-xl font-bold text-ink"
+        <label htmlFor="safety-path" className="mt-6 block text-sm font-semibold text-ink">
+          What happened?
+        </label>
+        <select
+          id="safety-path"
+          value={active.id}
+          onChange={(event) => setActiveId(event.target.value as SafetyPathId)}
+          className="mt-2 min-h-11 w-full max-w-xl border border-line bg-white px-3 text-sm text-ink"
         >
+          {SAFETY_PATHS.map((path) => (
+            <option key={path.id} value={path.id}>
+              {path.title}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <article className="sheet px-5 py-6 sm:px-6" aria-labelledby="safety-path-title">
+        <h3 id="safety-path-title" className="font-display text-xl font-bold text-ink">
           {active.title}
         </h3>
         <p className="mt-2 text-sm text-ink-soft">{active.summary}</p>
@@ -75,11 +46,6 @@ export function SafetyGuide() {
             <li key={step}>{step}</li>
           ))}
         </ol>
-        <p className="mt-6 border-t border-line pt-4 text-sm text-ink-muted">
-          Prefer official apps and websites you open yourself. For possible
-          account or payment exposure, contact your bank or service provider
-          directly through a channel you already trust.
-        </p>
       </article>
     </section>
   )

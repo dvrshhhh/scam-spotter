@@ -122,18 +122,18 @@ export function LearnPractice() {
               onClick={() => choose('suspicious')}
               disabled={revealed}
               aria-pressed={answer === 'suspicious'}
-              className="min-h-11 border border-risk-high bg-risk-high-bg px-4 text-sm font-semibold text-risk-high transition hover:border-risk-high disabled:cursor-default disabled:opacity-70"
+              className="min-h-11 bg-brand px-4 text-sm font-semibold text-sheet transition hover:bg-brand-deep disabled:cursor-default disabled:opacity-70"
             >
-              Looks suspicious
+              Suspicious
             </button>
             <button
               type="button"
               onClick={() => choose('ordinary')}
               disabled={revealed}
               aria-pressed={answer === 'ordinary'}
-              className="min-h-11 border border-risk-low bg-risk-low-bg px-4 text-sm font-semibold text-risk-low transition hover:border-risk-low disabled:cursor-default disabled:opacity-70"
+              className="min-h-11 border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-ink disabled:cursor-default disabled:opacity-70"
             >
-              Looks ordinary
+              Ordinary
             </button>
           </div>
         </fieldset>

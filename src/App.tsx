@@ -44,7 +44,7 @@ export default function App() {
   const [result, setResult] = useState<CheckResult | null>(null)
   const [activeExample, setActiveExample] = useState<ExampleKind | null>(null)
   const [statusText, setStatusText] = useState(
-    'Ready. Paste a message or load an example, then choose Check message.',
+    'Ready. Paste a message or choose an example, then check it.',
   )
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
   const [historyEnabled, setHistoryEnabled] = useState(() =>
@@ -61,7 +61,7 @@ export default function App() {
     setResult(next)
     setSaveStatus(null)
     setStatusText(
-      `Result updated: ${next.riskLabel}, score ${next.score} out of 100, ${next.signals.length} warning sign${next.signals.length === 1 ? '' : 's'} detected.`,
+      `Result updated: ${next.riskLabel}, score ${next.score} out of 100.`,
     )
     window.requestAnimationFrame(() => {
       resultRef.current?.focus()
@@ -81,7 +81,7 @@ export default function App() {
     setResult(null)
     setActiveExample(null)
     setSaveStatus(null)
-    setStatusText('Message cleared. Ready for a new check.')
+    setStatusText('Message cleared.')
   }
 
   function handleLoadExample(kind: ExampleKind) {
@@ -92,18 +92,16 @@ export default function App() {
     setResult(null)
     setSaveStatus(null)
     setTab('check')
-    setStatusText(
-      `Loaded the ${example.label.toLowerCase()} example. Choose Check message to analyze it.`,
-    )
+    setStatusText(`Loaded “${example.label}”. Check the message when ready.`)
   }
 
   function enableHistory() {
     try {
       window.localStorage.setItem(HISTORY_ENABLED_KEY, '1')
       setHistoryEnabled(true)
-      setStatusText('Local scan history enabled on this device.')
+      setStatusText('Local history turned on.')
     } catch {
-      setStatusText('Could not enable history. Storage may be blocked.')
+      setStatusText('Could not enable history.')
     }
   }
 
@@ -111,18 +109,14 @@ export default function App() {
     try {
       window.localStorage.setItem(HISTORY_ENABLED_KEY, '0')
       setHistoryEnabled(false)
-      setStatusText('Local scan history disabled. Existing summaries were kept until cleared.')
+      setStatusText('Local history turned off.')
     } catch {
       setStatusText('Could not update history setting.')
     }
   }
 
   function handleSaveScan() {
-    if (!result) return
-    if (!historyEnabled) {
-      setSaveStatus('Enable optional history below before saving a summary.')
-      return
-    }
+    if (!result || !historyEnabled) return
 
     const entry: SavedScanMeta = {
       savedAt: new Date().toISOString(),
@@ -135,12 +129,10 @@ export default function App() {
       const next = [entry, ...readSavedScans()].slice(0, 20)
       window.localStorage.setItem(SAVE_KEY, JSON.stringify(next))
       setSavedScans(next)
-      setSaveStatus(
-        'Saved date, risk level, and warning-sign categories on this device. Message text was not stored.',
-      )
-      setStatusText('Scan summary saved locally on this device.')
+      setSaveStatus('Saved summary locally (no message text).')
+      setStatusText('Scan summary saved.')
     } catch {
-      setSaveStatus('Could not save on this device. Storage may be blocked.')
+      setSaveStatus('Could not save on this device.')
     }
   }
 
@@ -148,9 +140,9 @@ export default function App() {
     try {
       window.localStorage.removeItem(SAVE_KEY)
       setSavedScans([])
-      setStatusText('Local scan history cleared.')
+      setStatusText('Local history cleared.')
     } catch {
-      setStatusText('Could not clear history on this device.')
+      setStatusText('Could not clear history.')
     }
   }
 
@@ -159,10 +151,10 @@ export default function App() {
       <AppHeader />
       <AppNav active={tab} onChange={setTab} />
 
-      <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
         {tab === 'check' && (
           <>
-            <main className="sheet px-5 py-6 sm:px-7 sm:py-8">
+            <main className="sheet px-5 py-6 sm:px-6">
               <MessageInput
                 value={message}
                 onChange={(value) => {
@@ -172,26 +164,21 @@ export default function App() {
                 onCheck={handleCheck}
                 onClear={handleClear}
               />
-
-              <div className="mt-8">
+              <div className="mt-6 border-t border-line pt-5">
                 <ExampleButtons onLoad={handleLoadExample} activeId={activeExample} />
               </div>
             </main>
 
-            <div className="mt-6">
-              <PrivacyNote
-                onSaveScan={handleSaveScan}
-                saveEnabled={Boolean(result) && historyEnabled}
-                saveStatus={saveStatus}
-              />
-            </div>
-
-            <div className="mt-6">
+            <div className="mt-5 space-y-4">
+              <PrivacyNote />
               <ScanHistory
                 enabled={historyEnabled}
                 scans={savedScans}
+                canSave={Boolean(result)}
+                saveStatus={saveStatus}
                 onEnable={enableHistory}
                 onDisable={disableHistory}
+                onSave={handleSaveScan}
                 onClear={handleClearHistory}
               />
             </div>
@@ -199,7 +186,7 @@ export default function App() {
             <div
               ref={resultRef}
               tabIndex={-1}
-              className="mt-10 outline-none"
+              className="mt-8 outline-none"
               aria-labelledby={result ? 'result-heading' : undefined}
             >
               {result ? (
@@ -208,19 +195,9 @@ export default function App() {
                   onInspectLinks={() => setTab('links')}
                 />
               ) : (
-                <section
-                  className="border border-dashed border-line bg-sheet/70 px-5 py-8 sm:px-7"
-                  aria-label="Results placeholder"
-                >
-                  <p className="font-display text-xl font-bold text-ink">
-                    Results appear after you check a message
-                  </p>
-                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">
-                    You will get a risk level, a transparent score, matched
-                    warning signs, likely pattern labels, and safer next steps.
-                    This cannot prove a message is safe or fraudulent.
-                  </p>
-                </section>
+                <p className="text-sm text-ink-soft">
+                  Results appear here after you check a message.
+                </p>
               )}
             </div>
           </>
@@ -230,41 +207,11 @@ export default function App() {
         {tab === 'safety' && <SafetyGuide />}
         {tab === 'learn' && <LearnPractice />}
 
-        <section
-          className="mt-10 border-t border-line pt-6"
-          aria-labelledby="limitations-heading"
-        >
-          <h2
-            id="limitations-heading"
-            className="font-display text-base font-bold text-ink"
-          >
-            Limitations
-          </h2>
-          <ul className="mt-2 max-w-3xl space-y-2 text-sm leading-relaxed text-ink-muted">
-            <li>
-              The checker flags common warning signs and can make mistakes. A
-              low score is not a guarantee of safety.
-            </li>
-            <li>
-              Link inspection only reviews URL structure locally. It never
-              visits links and cannot check live reputation.
-            </li>
-            <li>
-              No remote AI or paid API is used. Core tools work offline after
-              dependencies are installed.
-            </li>
-            <li>
-              Always verify through official apps, websites, or numbers you
-              already trust.
-            </li>
-          </ul>
-        </section>
-
-        <footer className="mt-8 border-t border-line pt-4 text-sm text-ink-soft">
+        <footer className="mt-10 border-t border-line pt-4 text-sm text-ink-soft">
           <p>
-            Scam Message Checker is an educational scam-safety toolkit for a
-            third-year BTech Engineering Innovation Project. It is not a
-            substitute for official fraud guidance.
+            Educational toolkit for a BTech project. Flags common warning signs
+            only — not a guarantee of safety, and not a substitute for official
+            fraud guidance.
           </p>
         </footer>
       </div>
