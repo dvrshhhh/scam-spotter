@@ -3,7 +3,6 @@
  * Run: npm run test:detection
  */
 import { EXAMPLE_MESSAGES } from '../src/data/examples'
-import { QUIZ_SAMPLES } from '../src/data/quiz'
 import { SAFETY_PATHS } from '../src/data/safetyGuide'
 import { checkMessage } from '../src/detection/checkMessage'
 import { classifyPatterns } from '../src/detection/classify'
@@ -224,7 +223,7 @@ for (const urlCase of urlCases) {
   }
 }
 
-// Safety guide + quiz integrity
+// Safety guide integrity
 if (SAFETY_PATHS.length !== 4) {
   failed += 1
   console.error(`FAIL safety-paths: expected 4, got ${SAFETY_PATHS.length}`)
@@ -236,28 +235,6 @@ for (const path of SAFETY_PATHS) {
   if (path.steps.length < 3) {
     failed += 1
     console.error(`FAIL safety-${path.id}: too few steps`)
-  }
-}
-
-if (QUIZ_SAMPLES.length < 4) {
-  failed += 1
-  console.error(`FAIL quiz-samples: expected at least 4`)
-} else {
-  console.log(`PASS quiz-samples: ${QUIZ_SAMPLES.length} educational samples`)
-}
-
-const suspiciousQuiz = QUIZ_SAMPLES.filter((s) => s.isSuspicious)
-for (const sample of suspiciousQuiz) {
-  const result = checkMessage(sample.text)
-  if (result.riskLevel === 'low') {
-    failed += 1
-    console.error(
-      `FAIL quiz-${sample.id}: suspicious sample scored Low (${result.score})`,
-    )
-  } else {
-    console.log(
-      `PASS quiz-${sample.id}: ${result.riskLabel} ${result.score}/100`,
-    )
   }
 }
 

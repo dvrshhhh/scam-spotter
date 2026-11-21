@@ -2,7 +2,6 @@ import { useId, useRef, useState } from 'react'
 import { AppHeader } from './components/AppHeader'
 import { AppNav, type AppTab } from './components/AppNav'
 import { ExampleButtons } from './components/ExampleButtons'
-import { LearnPractice } from './components/LearnPractice'
 import { LinkChecker } from './components/LinkChecker'
 import { MessageInput } from './components/MessageInput'
 import { PrivacyNote } from './components/PrivacyNote'
@@ -205,7 +204,6 @@ export default function App() {
 
         {tab === 'links' && <LinkChecker seedText={message} />}
         {tab === 'safety' && <SafetyGuide />}
-        {tab === 'learn' && <LearnPractice />}
 
         <footer className="mt-10 border-t border-line pt-4 text-sm text-ink-soft">
           <p>

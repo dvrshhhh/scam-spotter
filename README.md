@@ -35,12 +35,11 @@ VITE_BASE=/scam-spotter/ npm run build
 
 ## Features
 
-Simple top nav: **Check · Links · Guide · Learn**.
+Simple top nav: **Check · Links · Guide**.
 
 1. **Check** — paste a message (or pick one example from a dropdown), run the local risk score (**Low risk / Review carefully / High risk**), see warning signs, likely patterns, hostnames, and next steps. Score details stay collapsed until you open them.
 2. **Links** — inspect URLs from pasted text for structural clues only. Never visits links.
 3. **Guide** — pick a situation from a dropdown and follow calm next steps. No invented phone numbers.
-4. **Learn** — educational quiz samples with reveal, score, and try again.
 
 ### Optional scan history
 
@@ -96,8 +95,8 @@ Likely patterns (when clues support them): account impersonation, payment reques
 
 ```
 src/
-  components/   Check UI, link inspection, safety guide, learn quiz, history, nav
-  data/         Examples, safety paths, quiz samples
+  components/   Check UI, link inspection, safety guide, history, nav
+  data/         Examples and safety paths
   detection/    Rules, scoring, URL heuristics, pattern classification
   App.tsx       Toolkit shell
 ```

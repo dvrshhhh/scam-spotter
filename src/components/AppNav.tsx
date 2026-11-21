@@ -1,4 +1,4 @@
-export type AppTab = 'check' | 'links' | 'safety' | 'learn'
+export type AppTab = 'check' | 'links' | 'safety'
 
 interface AppNavProps {
   active: AppTab
@@ -9,7 +9,6 @@ const TABS: { id: AppTab; label: string }[] = [
   { id: 'check', label: 'Check' },
   { id: 'links', label: 'Links' },
   { id: 'safety', label: 'Guide' },
-  { id: 'learn', label: 'Learn' },
 ]
 
 export function AppNav({ active, onChange }: AppNavProps) {
