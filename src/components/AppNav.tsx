@@ -5,6 +5,9 @@ interface AppNavProps {
   onChange: (tab: AppTab) => void
 }
 
+/** Nav revision marker: three tabs only (Check · Links · Guide). No Learn. */
+export const NAV_REVISION = 'nav-v3-no-learn-20261121'
+
 const TABS: { id: AppTab; label: string }[] = [
   { id: 'check', label: 'Check' },
   { id: 'links', label: 'Links' },
@@ -16,6 +19,7 @@ export function AppNav({ active, onChange }: AppNavProps) {
     <nav
       className="sticky top-0 z-20 border-b border-line bg-sheet/95 backdrop-blur-sm"
       aria-label="App sections"
+      data-nav-revision={NAV_REVISION}
     >
       <div
         className="mx-auto flex w-full max-w-5xl gap-1 px-4 sm:px-6 lg:px-8"
