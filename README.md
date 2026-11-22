@@ -41,19 +41,12 @@ Simple top nav: **Check · Links · Guide**.
 2. **Links** — inspect URLs from pasted text for structural clues only. Never visits links.
 3. **Guide** — pick a situation from a dropdown and follow calm next steps. No invented phone numbers.
 
-### Optional scan history
-
-- History is **disabled by default**. Enable it explicitly if you want summaries.
-- When enabled, only **date**, **risk level**, and **warning-sign categories** are stored in this browser’s `localStorage`.
-- The original message text is **never** stored.
-- Use **Clear history** to remove saved summaries. Disabling history stops new saves; clear removes what was stored.
-
 ## Privacy
 
 - Checking and link inspection run **locally in the browser** after dependencies are installed.
 - Message contents are **not uploaded** and are **not logged** to the console.
 - No backend, paid service, API key, or remote AI is required for core tools.
-- Optional history (off by default) stores only non-content metadata on this device.
+- Nothing is stored on the device for core checking.
 
 ## How detection & scoring work
 
@@ -95,7 +88,7 @@ Likely patterns (when clues support them): account impersonation, payment reques
 
 ```
 src/
-  components/   Check UI, link inspection, safety guide, history, nav
+  components/   Check UI, link inspection, safety guide, nav
   data/         Examples and safety paths
   detection/    Rules, scoring, URL heuristics, pattern classification
   App.tsx       Toolkit shell
